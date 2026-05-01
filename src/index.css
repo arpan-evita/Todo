@@ -4,7 +4,6 @@
   --color-primary-container: #00f2ff;
   --color-secondary-container: #7000ff;
   --color-background: #050505;
-  
   --font-display-xl: "Inter", sans-serif;
   --font-label-caps: "Space Grotesk", sans-serif;
 }
@@ -12,32 +11,94 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
-/* SUPREME ENGINE RESET */
+/* IRONCLAD CORE RESET */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 html, body, #root {
-  width: 100vw;
-  height: 100vh;
-  background: #000000;
-  color: #ffffff;
-  font-family: 'Inter', sans-serif;
-  overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
 }
 
-/* Material Symbols Adjustments */
-.material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    font-size: 24px;
-}
-.material-symbols-outlined.fill-1 {
-    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+/* SUPREME COMMANDER: IRONCLAD LAYOUT (Manual CSS) */
+.supreme-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
 }
 
-/* LOGIN DESIGN SYSTEM */
+.top-strat-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(40px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    z-index: 1000;
+}
+
+.side-mission-rail {
+    position: fixed;
+    left: 0;
+    top: 64px;
+    bottom: 0;
+    width: 80px;
+    background: rgba(8, 8, 8, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    padding: 32px 0;
+    z-index: 900;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.side-mission-rail:hover {
+    width: 240px;
+}
+
+.main-mission-stage {
+    flex: 1;
+    margin-top: 64px;
+    margin-left: 80px;
+    padding: 40px;
+    overflow-y: auto;
+    background: radial-gradient(circle at top right, #0a0a15, #000000);
+}
+
+/* TYPOGRAPHY ANCHORS */
+.daily-command-header {
+    font-size: 28px !important;
+    font-weight: 900 !important;
+    font-style: italic !important;
+    text-transform: uppercase !important;
+    letter-spacing: -1px !important;
+}
+
+.label-caps-supreme {
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+}
+
+/* LOGIN DESIGN SYSTEM (Ironclad) */
 .login-bg {
     background: radial-gradient(circle at 50% 0%, #1a1a2e, #000000);
     width: 100vw;
@@ -45,33 +106,26 @@ html, body, #root {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
 }
 
-.glass-card {
-    background: rgba(10, 10, 10, 0.7);
+.login-card-supreme {
+    background: rgba(10, 10, 10, 0.8);
     backdrop-filter: blur(40px);
     border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 64px;
     border-radius: 32px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
 }
 
 .login-input-group {
     position: relative;
+    margin-bottom: 24px;
     width: 100%;
-    margin-bottom: 20px;
 }
 
-.login-icon {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #00f2ff;
-    opacity: 0.5;
-}
-
-.login-input {
+.login-input-supreme {
     width: 100%;
     background: rgba(255, 255, 255, 0.03) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -79,18 +133,10 @@ html, body, #root {
     padding: 18px 20px 18px 56px !important;
     color: #fff !important;
     font-size: 14px !important;
-    font-weight: 600 !important;
     outline: none !important;
-    transition: all 0.3s ease !important;
 }
 
-.login-input:focus {
-    border-color: #00f2ff !important;
-    background: rgba(0, 242, 255, 0.05) !important;
-    box-shadow: 0 0 20px rgba(0, 242, 255, 0.1) !important;
-}
-
-.login-btn {
+.login-btn-supreme {
     width: 100%;
     padding: 20px;
     background: #00f2ff;
@@ -99,33 +145,35 @@ html, body, #root {
     color: #000;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 13px;
+    letter-spacing: 3px;
     cursor: pointer;
     box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
-    transition: all 0.3s ease;
 }
 
-.login-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 40px rgba(0, 242, 255, 0.5);
+/* UTILITIES */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-size: 24px;
+}
+.fill-1 { font-variation-settings: 'FILL' 1 !important; }
+
+.status-dock-supreme {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    z-index: 2000;
 }
 
-/* CUSTOM UTILITIES */
-.xp-bar-glow {
-    box-shadow: 0 0 20px rgba(0, 242, 255, 0.4), 0 0 40px rgba(0, 242, 255, 0.1);
-}
-
-::-webkit-scrollbar {
-    width: 6px;
-}
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 242, 255, 0.3);
+@media (max-width: 1024px) {
+    .main-mission-stage { margin-left: 0; margin-bottom: 80px; padding: 24px; }
+    .side-mission-rail { display: none !important; }
 }

@@ -173,9 +173,9 @@ function App() {
   if (!session) return <Login />;
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-cyan-500/30 overflow-hidden flex flex-col">
+    <div className="supreme-container">
       {/* SUPREME COMMANDER: TOP STRAT-BAR (Desktop Only) */}
-      <header className="fixed top-0 left-0 right-0 h-16 border-b border-white/5 bg-black/80 backdrop-blur-xl z-[100] hidden lg:flex items-center justify-between px-8">
+      <header className="top-strat-bar hidden lg:flex">
         <div className="flex items-center space-x-4">
           <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 font-display-xl uppercase tracking-tighter italic">
             ARPAN-TODO
@@ -210,13 +210,13 @@ function App() {
       </header>
 
       {/* SUPREME COMMANDER: SIDE MISSION-RAIL (Desktop Only) */}
-      <nav className="fixed left-0 top-16 bottom-0 w-20 hover:w-64 bg-black/90 backdrop-blur-2xl border-r border-white/5 z-[90] hidden lg:flex flex-col py-8 transition-all duration-500 group">
+      <nav className="side-mission-rail group">
         <div className="px-6 mb-12 flex items-center space-x-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-black text-sm font-bold">token</span>
           </div>
           <div className="overflow-hidden">
-            <p className="font-label-caps text-[10px] text-cyan-400 whitespace-nowrap">ARPAN COMMANDER</p>
+            <p className="label-caps-supreme text-cyan-400 whitespace-nowrap">ARPAN COMMANDER</p>
             <p className="text-[9px] text-slate-500 whitespace-nowrap">MISSION CONTROL v4.2</p>
           </div>
         </div>
@@ -240,7 +240,7 @@ function App() {
               <span className={`material-symbols-outlined transition-transform duration-300 group-hover/item:scale-110 ${activeTab === item.id ? 'fill-1' : ''}`}>
                 {item.icon}
               </span>
-              <span className="ml-6 font-label-caps text-[11px] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+              <span className="ml-6 label-caps-supreme opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                 {item.label}
               </span>
               {activeTab === item.id && (
@@ -256,12 +256,12 @@ function App() {
             className="w-full flex items-center h-12 rounded-xl text-slate-500 hover:text-red-400 hover:bg-red-500/5 transition-all duration-300 px-4 group/logout"
           >
             <span className="material-symbols-outlined group-hover/logout:rotate-12 transition-transform">power_settings_new</span>
-            <span className="ml-6 font-label-caps text-[11px] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-red-500/80">TERMINATE_SESSION</span>
+            <span className="ml-6 label-caps-supreme opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-red-500/80">TERMINATE</span>
           </button>
         </div>
       </nav>
 
-      {/* MOBILE HEADER (Preserved) */}
+      {/* MOBILE HEADER */}
       <header className="flex lg:hidden items-center justify-between px-6 h-16 border-b border-white/5">
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 rounded-full border border-cyan-400/50 overflow-hidden">
@@ -276,8 +276,8 @@ function App() {
       </header>
 
       {/* SUPREME MAIN STAGE */}
-      <main className="flex-1 overflow-y-auto lg:pl-20 lg:pt-16">
-        <div className="max-w-[1600px] mx-auto p-6 lg:p-10">
+      <main className="main-mission-stage">
+        <div className="max-w-[1600px] mx-auto">
           {activeTab === 'board' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* LEFT: MISSION HUB */}
@@ -290,11 +290,11 @@ function App() {
                       <h2 className="text-6xl font-black text-white italic tracking-tighter uppercase leading-none">CYBER_KNIGHT</h2>
                       <div className="flex flex-col items-end">
                         <div className="px-3 py-1 bg-cyan-500/10 text-cyan-400 text-[10px] font-label-caps border border-cyan-500/20 rounded-full mb-4">LEVEL 42</div>
-                        <p className="text-[10px] font-label-caps text-slate-500 tracking-widest mb-1">NEXT LEVEL IN</p>
+                        <p className="text-[10px] label-caps-supreme text-slate-500 tracking-widest mb-1">NEXT LEVEL IN</p>
                         <p className="text-3xl font-black text-white italic">1,250 XP</p>
                       </div>
                     </div>
-                    <p className="text-cyan-400 font-label-caps text-[10px] tracking-widest uppercase mb-8">RANK: SUPREME COMMANDER • SYSTEM INTEGRITY 98%</p>
+                    <p className="text-cyan-400 label-caps-supreme mb-8">RANK: SUPREME COMMANDER • SYSTEM INTEGRITY 98%</p>
                     
                     <div className="space-y-4">
                       <div className="h-2.5 bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
@@ -303,7 +303,7 @@ function App() {
                           style={{ width: `${xpProgress}%` }}
                         ></div>
                       </div>
-                      <div className="flex justify-between text-[10px] font-label-caps text-slate-500 tracking-widest uppercase">
+                      <div className="flex justify-between label-caps-supreme text-slate-500">
                         <span>{xp % 15000} / 5,000 XP</span>
                         <span className="text-white/60">{Math.round(xpProgress)}% COMPLETE</span>
                       </div>
@@ -315,11 +315,11 @@ function App() {
                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
                   <div className="flex items-center space-x-3 text-white">
                     <span className="material-symbols-outlined text-cyan-400 fill-1">reorder</span>
-                    <h3 className="text-2xl font-black italic uppercase tracking-tighter">Daily Command</h3>
+                    <h3 className="daily-command-header">Daily Command</h3>
                   </div>
                   <button 
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black rounded-lg font-label-caps text-[10px] font-bold transition-all shadow-[0_0_20px_rgba(0,242,255,0.2)]"
+                    className="flex items-center space-x-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black rounded-lg font-bold transition-all shadow-[0_0_20px_rgba(0,242,255,0.2)]"
                   >
                     + NEW MISSION
                   </button>
@@ -342,10 +342,10 @@ function App() {
                         <h4 className={`text-sm font-bold tracking-tight mb-1 ${task.status === 'done' ? 'text-slate-500 line-through' : 'text-white'}`}>
                           {task.title}
                         </h4>
-                        <p className="text-[10px] text-slate-500 font-label-caps uppercase tracking-widest">Tactical • Due in 2 hours</p>
+                        <p className="text-[10px] text-slate-500 label-caps-supreme tracking-widest">Tactical • Due in 2 hours</p>
                       </div>
                       <div className="flex items-center space-x-4">
-                        <span className="px-2 py-0.5 bg-cyan-500/5 text-cyan-400 text-[8px] font-label-caps border border-cyan-500/20 rounded tracking-widest">HIGH PRIORITY</span>
+                        <span className="px-2 py-0.5 bg-cyan-500/5 text-cyan-400 text-[8px] border border-cyan-500/20 rounded label-caps-supreme">HIGH PRIORITY</span>
                         <button className="text-slate-600 hover:text-white transition-colors">
                           <span className="material-symbols-outlined text-lg">more_vert</span>
                         </button>
@@ -363,7 +363,7 @@ function App() {
                       <Flame size={32} className="text-orange-500" fill="currentColor" />
                     </div>
                     <h4 className="text-7xl font-black text-white italic tracking-tighter leading-none mb-2">{streak}</h4>
-                    <p className="text-[10px] font-label-caps text-orange-500 tracking-[0.3em] uppercase mb-6">Day Streak Active</p>
+                    <p className="text-[10px] label-caps-supreme text-orange-500 mb-6">Day Streak Active</p>
                     <p className="text-[10px] text-slate-500 font-medium uppercase leading-relaxed max-w-[200px] mx-auto">Maintain operational consistency for 6 more cycles to unlock the "Eternal Flame" cosmetic module.</p>
                   </div>
                 </section>
@@ -372,7 +372,7 @@ function App() {
                 <section className="p-8 rounded-3xl bg-[#080808] border border-white/5 space-y-6">
                   <div className="flex items-center space-x-3 text-cyan-400">
                     <span className="material-symbols-outlined text-sm">info</span>
-                    <h4 className="text-[10px] font-label-caps tracking-[0.2em] uppercase">Squad Intel Brief</h4>
+                    <h4 className="label-caps-supreme">Squad Intel Brief</h4>
                   </div>
                   <div className="space-y-4">
                     <div className="flex items-start space-x-3">
@@ -393,12 +393,12 @@ function App() {
                 {/* MISSION LOG (Calendar) */}
                 <section className="p-8 rounded-3xl bg-[#080808] border border-white/5">
                   <div className="flex items-center justify-between mb-8">
-                    <h4 className="text-[10px] font-label-caps text-slate-400 tracking-[0.2em] uppercase">Mission Log</h4>
-                    <span className="text-[9px] font-label-caps text-slate-600 uppercase">October 2023</span>
+                    <h4 className="label-caps-supreme text-slate-400">Mission Log</h4>
+                    <span className="text-[9px] label-caps-supreme text-slate-600 uppercase">October 2023</span>
                   </div>
                   <div className="grid grid-cols-7 gap-y-4 text-center">
                     {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(day => (
-                      <span key={day} className="text-[9px] font-label-caps text-slate-700">{day}</span>
+                      <span key={day} className="text-[9px] label-caps-supreme text-slate-700">{day}</span>
                     ))}
                     {[28, 29, 30, 1, 2, 3, 4, 5, 6, 7, 8].map((date, i) => (
                       <div key={i} className={`text-[10px] font-bold ${date === 3 ? 'text-cyan-400 p-1.5 border border-cyan-400/50 rounded-lg bg-cyan-400/10' : 'text-slate-600'}`}>
@@ -421,27 +421,27 @@ function App() {
         </div>
       </main>
 
-      {/* SUPREME COMMANDER: STATUS DOCK (Desktop Only) */}
-      <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 h-12 px-8 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-full hidden lg:flex items-center space-x-8 z-[100] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+      {/* SUPREME COMMANDER: STATUS DOCK */}
+      <footer className="status-dock-supreme hidden lg:flex">
         <div className="flex items-center space-x-2">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]"></span>
-          <span className="text-[9px] font-label-caps text-slate-400 tracking-widest uppercase">SECURED</span>
+          <span className="label-caps-supreme text-slate-400">SECURED</span>
         </div>
         <div className="w-px h-4 bg-white/10"></div>
         <div className="flex items-center space-x-2">
           <span className="material-symbols-outlined text-xs text-cyan-400">bolt</span>
-          <span className="text-[9px] font-label-caps text-slate-400 tracking-widest uppercase">14ms</span>
+          <span className="label-caps-supreme text-slate-400">14ms</span>
         </div>
         <div className="w-px h-4 bg-white/10"></div>
         <div className="flex items-center space-x-2">
           <span className="material-symbols-outlined text-xs text-purple-400">cloud_done</span>
-          <span className="text-[9px] font-label-caps text-slate-400 tracking-widest uppercase">Cloud_Sync 100%</span>
+          <span className="label-caps-supreme text-slate-400">SYNC: 100%</span>
         </div>
       </footer>
 
       <TaskModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTask(null); }} onSave={handleSaveTask} editingTask={editingTask} />
 
-      {/* MOBILE DOCK (Strictly Mobile Only) */}
+      {/* MOBILE DOCK */}
       <nav className="fixed bottom-0 left-0 right-0 h-20 bg-black/80 backdrop-blur-2xl border-t border-white/5 flex lg:!hidden items-center justify-around px-4 z-[100]">
         <button onClick={() => setActiveTab('board')} className={`p-3 rounded-xl transition-all ${activeTab === 'board' ? 'text-cyan-400 bg-cyan-500/10' : 'text-slate-500'}`}><LayoutDashboard size={24} /></button>
         <button onClick={() => setActiveTab('levels')} className={`p-3 rounded-xl transition-all ${activeTab === 'levels' ? 'text-cyan-400 bg-cyan-500/10' : 'text-slate-500'}`}><Zap size={24} /></button>

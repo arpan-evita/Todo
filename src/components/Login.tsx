@@ -32,13 +32,13 @@ export default function Login() {
 
   return (
     <div className="login-bg">
-      <div className="glass-card" style={{ maxWidth: '400px', padding: '40px', textAlign: 'center' }}>
+      <div className="login-card-supreme">
         <div className="w-20 h-20 rounded-2xl bg-cyan-400 flex items-center justify-center mb-10 mx-auto shadow-[0_0_40px_rgba(0,242,255,0.4)]">
            <Zap size={44} className="text-black" strokeWidth={3} />
         </div>
         
         <h2 className="text-3xl font-black text-white italic tracking-widest uppercase mb-2">PILOT AUTH</h2>
-        <p className="label-caps text-cyan-400 mb-10 opacity-60" style={{ fontSize: '10px' }}>Global Command Sync v3.0</p>
+        <p className="label-caps-supreme text-cyan-400 mb-10 opacity-60">Global Command Sync v4.2</p>
 
         <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="login-input-group">
@@ -48,7 +48,7 @@ export default function Login() {
               placeholder="PILOT EMAIL"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="login-input"
+              className="login-input-supreme"
               required
             />
           </div>
@@ -60,7 +60,7 @@ export default function Login() {
               placeholder="ENCRYPTION KEY"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="login-input"
+              className="login-input-supreme"
               required
             />
           </div>
@@ -68,7 +68,7 @@ export default function Login() {
           <button 
             type="submit" 
             disabled={loading}
-            className="login-btn"
+            className="login-btn-supreme"
           >
             {loading ? 'SYNCING...' : isSignUp ? 'INITIALIZE PROFILE' : 'ACCESS DASHBOARD'}
           </button>
