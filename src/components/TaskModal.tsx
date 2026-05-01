@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save } from 'lucide-react';
+import { X, Save, Zap } from 'lucide-react';
 import type { Task, Priority } from '../types';
 
 interface TaskModalProps {
@@ -14,10 +14,9 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
-  const [category, setCategory] = useState('Work');
+  const [category, setCategory] = useState('Tactical');
   const [dueDate, setDueDate] = useState('');
 
-  // Sync state when editingTask changes
   useEffect(() => {
     if (editingTask) {
       setTitle(editingTask.title);
@@ -29,7 +28,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setTitle('');
       setDescription('');
       setPriority('medium');
-      setCategory('Work');
+      setCategory('Tactical');
       setDueDate('');
     }
   }, [editingTask, isOpen]);
@@ -50,96 +49,108 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+          {/* Backdrop */}
           <motion.div 
-            className="modal-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
           />
+
+          {/* Modal Card */}
           <motion.div 
-            className="modal-content"
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            className="relative w-full max-w-lg glass-panel p-8 rounded-3xl border-cyan-500/20 overflow-hidden"
           >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">{editingTask ? 'Edit Task' : 'New Mission'}</h3>
-              <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#666' }}>
-                <X size={24} />
+            {/* Corner Accent */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 blur-[40px] -z-10" />
+            
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 rounded-xl bg-cyan-400/10 flex items-center justify-center border border-cyan-400/20">
+                  <Zap size={20} className="text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-white italic tracking-tighter uppercase leading-none">
+                    {editingTask ? 'EDIT_MISSION' : 'INITIALIZE_MISSION'}
+                  </h3>
+                  <p className="text-[10px] font-mono font-bold text-cyan-400/60 tracking-widest uppercase mt-1">
+                    Neural Link Active v4.2
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={onClose}
+                className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+              >
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-muted uppercase">Task Name</label>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">MISSION TITLE</label>
                 <input 
                   autoFocus
                   type="text" 
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="What needs to be done?"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '16px', borderRadius: '15px', color: '#fff', outline: 'none' }}
+                  placeholder="DESIGNATE OBJECTIVE..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-sm"
+                  required
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-muted uppercase">Details</label>
+              <div className="space-y-2">
+                <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">TACTICAL DETAILS</label>
                 <textarea 
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add more details..."
+                  placeholder="ADD OPERATIONAL PARAMETERS..."
                   rows={3}
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '16px', borderRadius: '15px', color: '#fff', outline: 'none' }}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-sm resize-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-muted uppercase">Priority</label>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">PRIORITY_LEVEL</label>
                   <select 
                     value={priority}
                     onChange={(e) => setPriority(e.target.value as Priority)}
-                    style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '12px', color: '#fff', outline: 'none' }}
+                    className="w-full bg-[#080808] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-xs uppercase appearance-none cursor-pointer"
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Routine Ops</option>
+                    <option value="high">Critical Asset</option>
                   </select>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-muted uppercase">Category</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">TARGET_DATE</label>
                   <input 
-                    type="text" 
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '12px', color: '#fff', outline: 'none' }}
+                    type="date" 
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="w-full bg-[#080808] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-xs cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-muted uppercase">Due Date</label>
-                <input 
-                  type="date" 
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '12px', color: '#fff', outline: 'none' }}
-                />
-              </div>
-
               <button 
                 type="submit"
-                style={{ background: '#00f2ff', border: 'none', padding: '16px', borderRadius: '18px', color: '#000', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '16px', boxShadow: '0 0 20px rgba(0, 242, 255, 0.4)' }}
+                className="w-full py-4 bg-cyan-400 hover:bg-cyan-300 text-black font-mono font-bold text-xs tracking-[0.2em] uppercase rounded-xl transition-all shadow-[0_0_30px_rgba(0,242,255,0.3)] hover:shadow-[0_0_40px_rgba(0,242,255,0.5)] active:scale-[0.98] flex items-center justify-center space-x-3"
               >
-                <Save size={20} />
-                {editingTask ? 'Save Changes' : 'Initialize Task'}
+                <Save size={18} />
+                <span>{editingTask ? 'UPDATE_MISSION' : 'INITIALIZE_CORE'}</span>
               </button>
             </form>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );
