@@ -1,36 +1,69 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Send, X, Terminal, Zap, BarChart3, Target } from 'lucide-react';
+import { Bot, Send, X, Terminal, Zap, BarChart3, Target, Activity } from 'lucide-react';
+import { detectOperativeState, OperativeState } from '../lib/ai/stateDetection';
+import { generateCoachingResponse } from '../lib/ai/responseEngine';
+import { supabase } from '../lib/supabase';
+import { calculateLevel } from '../lib/gameLogic';
 
 export default function AICoach({ userId }: { userId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
-  const [chat, setChat] = useState<{ role: 'ai' | 'user'; text: string }[]>([
-    { role: 'ai', text: 'Operational Coach online. Tactical data analyzed. What is your objective?' }
+  const [state, setState] = useState<OperativeState>('neutral');
+  const [chat, setChat] = useState<{ role: 'ai' | 'user'; text: any }[]>([
+    { role: 'ai', text: 'NEURAL LINK STABLE. Initializing emotional state analysis...' }
   ]);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) updateState();
+  }, [isOpen]);
+
+  const updateState = async (text?: string) => {
+    const result = await detectOperativeState(userId, text);
+    setState(result.state);
+    return result.state;
+  };
+
   const handleCommand = async (command: string) => {
+    if (!command.trim()) return;
     setLoading(true);
     setChat(prev => [...prev, { role: 'user', text: command }]);
+    setMessage('');
     
-    // Simulate AI processing (Wiring for real API later)
+    // 1. Detect state from text + behavior
+    const currentState = await updateState(command);
+
+    // 2. Fetch data for response
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    const { count: pending } = await supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'pending');
+
+    // 3. Generate adaptive response
+    const coaching = await generateCoachingResponse(currentState, {
+      xp: profile?.xp || 0,
+      streak: profile?.streak || 0,
+      pending: pending || 0,
+      level: calculateLevel(profile?.xp || 0)
+    });
+    
     setTimeout(() => {
-      let response = "";
-      if (command.includes('Plan')) {
-        response = "PLANNING_SEQUENCE: Based on your peak focus time (10:00), I suggest tackling your 'Money Mode' task first. Your completion rate is 20% higher when you start with high-priority mandates.";
-      } else if (command.includes('Analyze')) {
-        response = "BRUTAL_TRUTH: Your streak is healthy, but you are avoiding high-value tasks. You spent 4 hours on low-XP maintenance yesterday. This is busy-ness, not productivity.";
-      } else {
-        response = "MANDATE_RECEIVED: Analyzing neural patterns. Continue your current streak to unlock further insights.";
-      }
-      
-      setChat(prev => [...prev, { role: 'ai', text: response }]);
+      setChat(prev => [...prev, { 
+        role: 'ai', 
+        text: (
+          <div className="space-y-3">
+            <p className="font-black text-[#00f2ff]">{coaching.tone}</p>
+            <p><span className="text-slate-500 mr-2">INSIGHT:</span>{coaching.insight}</p>
+            <p><span className="text-slate-500 mr-2">ACTION:</span>{coaching.action}</p>
+            <p className="text-[10px] text-red-400 italic"><span className="text-slate-500 mr-2">URGENCY:</span>{coaching.urgency}</p>
+          </div>
+        ) 
+      }]);
       setLoading(false);
-    }, 1000);
+    }, 800);
   };
+
 
   return (
     <>
@@ -55,13 +88,15 @@ export default function AICoach({ userId }: { userId: string }) {
             {/* Header */}
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded bg-[#00f2ff]/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded bg-[#00f2ff]/20 flex items-center justify-center relative">
                   <Terminal size={18} className="text-[#00f2ff]" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-500 border-2 border-black animate-pulse" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-white">Mission Coach</h3>
-                  <p className="text-[8px] font-mono text-[#00f2ff] animate-pulse">V2.4 NEURAL_LINK_STABLE</p>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-white">Coach • <span className="text-[#00f2ff]">{state.toUpperCase()}</span></h3>
+                  <p className="text-[8px] font-mono text-slate-500">STATE: {state === 'peak' ? 'CRITICAL_MOMENTUM' : 'STABLE'}</p>
                 </div>
+
               </div>
               <button onClick={() => setIsOpen(false)} className="text-slate-500 hover:text-white transition-colors">
                 <X size={20} />
