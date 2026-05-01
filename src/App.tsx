@@ -408,17 +408,4 @@ function App() {
   );
 }
 
-      <TaskModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTask(null); }} onSave={handleSaveTask} editingTask={editingTask} />
-
-      <nav className="bottom-nav">
-        <button className="nav-item" style={{ color: activeTab === 'board' ? '#00f2ff' : '#666' }} onClick={() => setActiveTab('board')}><LayoutDashboard size={24} /></button>
-        <button className="nav-item" style={{ color: activeTab === 'levels' ? '#00f2ff' : '#666' }} onClick={() => setActiveTab('levels')}><Zap size={24} /></button>
-        <button className="center-btn" onClick={() => setIsModalOpen(true)}><Plus size={36} strokeWidth={3} /></button>
-        <button className="nav-item" style={{ color: activeTab === 'reports' ? '#00f2ff' : '#666' }} onClick={() => setActiveTab('reports')}><BarChart3 size={24} /></button>
-        <button className="nav-item" style={{ color: activeTab === 'profile' ? '#00f2ff' : '#666' }} onClick={() => setActiveTab('profile')}><User size={24} /></button>
-      </nav>
-    </div>
-  );
-}
-
 export default App;
