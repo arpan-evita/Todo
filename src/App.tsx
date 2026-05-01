@@ -77,17 +77,22 @@ function App() {
 
   useEffect(() => {
     if (session) {
-      fetchProfile();
-      fetchTasks();
+      const initialize = async () => {
+        const profileData = await fetchProfile();
+        if (profileData) {
+          await fetchTasks(profileData.xp || 0);
+        }
+      };
+      initialize();
     }
   }, [session]);
 
   const fetchProfile = async () => {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
     if (!error && data) {
-      setXp(data.xp || 0);
-      setLevel(calculateLevel(data.xp || 0));
-      // We don't set streak here anymore, fetchTasks handles it dynamically
+      const currentXp = data.xp || 0;
+      setXp(currentXp);
+      setLevel(calculateLevel(currentXp));
       setProfile({
         full_name: data.full_name || '',
         avatar_url: data.avatar_url || '',
@@ -95,7 +100,9 @@ function App() {
         mode: data.mode || 'Builder',
         custom_modules: data.custom_modules || ['General', 'Strategy', 'Focus']
       });
+      return data;
     }
+    return null;
   };
 
   const calculateStreak = (allTasks: Task[]) => {
@@ -112,7 +119,6 @@ function App() {
     const today = new Date().toDateString();
     const yesterday = new Date(Date.now() - 86400000).toDateString();
 
-    // Check if the latest completion is today or yesterday
     if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 0;
 
     let currentStreak = 0;
@@ -130,14 +136,15 @@ function App() {
     return currentStreak;
   };
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (currentXp?: number) => {
     const { data, error } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
     if (!error && data) {
       setTasks(data);
       const newStreak = calculateStreak(data);
       setStreak(newStreak);
       
-      const newLevel = calculateLevel(xp);
+      const xpToUse = currentXp !== undefined ? currentXp : xp;
+      const newLevel = calculateLevel(xpToUse);
       setLevel(newLevel);
       await supabase.from('profiles').update({ streak: newStreak, level: newLevel }).eq('id', session.user.id);
     }
