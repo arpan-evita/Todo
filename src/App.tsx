@@ -356,8 +356,9 @@ function App() {
               </div>
 
               {/* RIGHT: INTEL WING */}
-              <aside className="iron-col-4 space-y-8 hidden lg:block">
-                <section className="relative p-10 rounded-3xl bg-[#080808] border border-white/5 overflow-hidden text-center group">
+              <aside className="iron-col-4 space-y-6 hidden lg:block">
+                <section className="filament-module relative text-center group overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-b from-orange-500/5 to-transparent"></div>
                   <div className="relative z-10">
                     <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-8">
                       <Flame size={32} className="text-orange-500" fill="currentColor" />
@@ -369,11 +370,12 @@ function App() {
                 </section>
 
                 {/* SQUAD INTEL BRIEF */}
-                <section className="p-8 rounded-3xl bg-[#080808] border border-white/5 space-y-6">
+                <section className="filament-module space-y-6">
                   <div className="flex items-center space-x-3 text-cyan-400">
                     <span className="material-symbols-outlined text-sm">info</span>
                     <h4 className="label-caps-supreme">Squad Intel Brief</h4>
                   </div>
+                  <div className="h-px bg-cyan-400/10 -mx-8 my-4"></div>
                   <div className="space-y-4">
                     <div className="flex items-start space-x-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0"></div>
@@ -391,7 +393,7 @@ function App() {
                 </section>
 
                 {/* MISSION LOG (Calendar) */}
-                <section className="p-8 rounded-3xl bg-[#080808] border border-white/5">
+                <section className="filament-module">
                   <div className="flex items-center justify-between mb-8">
                     <h4 className="label-caps-supreme text-slate-400">Mission Log</h4>
                     <span className="text-[9px] label-caps-supreme text-slate-600 uppercase">October 2023</span>
@@ -401,12 +403,17 @@ function App() {
                       <span key={day} className="text-[9px] label-caps-supreme text-slate-700">{day}</span>
                     ))}
                     {[28, 29, 30, 1, 2, 3, 4, 5, 6, 7, 8].map((date, i) => (
-                      <div key={i} className={`text-[10px] font-bold ${date === 3 ? 'text-cyan-400 p-1.5 border border-cyan-400/50 rounded-lg bg-cyan-400/10' : 'text-slate-600'}`}>
+                      <div key={i} className={`text-[10px] font-bold h-8 flex items-center justify-center ${date === 3 ? 'text-cyan-400 border border-cyan-400/50 rounded-lg bg-cyan-400/10' : 'text-slate-600'}`}>
                         {date}
                       </div>
                     ))}
                   </div>
                 </section>
+
+                {/* TACTICAL VISUAL */}
+                <div className="tactical-image-frame">
+                  <img src="https://media.gemini.googleusercontent.com/api/2/media/0339e4a9-cfcd-4306-95c0-33fb86df6e25/1777628059036.png" />
+                </div>
               </aside>
             </div>
           )}
