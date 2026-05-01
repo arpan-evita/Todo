@@ -293,62 +293,91 @@ function App() {
                 </div>
               </motion.section>
 
-              {/* Daily Command Section */}
-              <section className="space-y-6">
-                <div className="flex justify-between items-center px-2">
-                  <h3 className="text-2xl font-bold text-white flex items-center font-sans tracking-tight">
-                    <Check className="w-6 h-6 text-cyan-400 mr-3" />
-                    Daily Command
-                  </h3>
-                  <button onClick={() => setIsModalOpen(true)} className="bg-primary-container text-black font-mono font-bold text-[10px] px-5 py-2.5 rounded-lg hover:shadow-[0_0_25px_rgba(0,242,255,0.4)] hover:scale-105 active:scale-95 transition-all tracking-widest uppercase">
-                    + NEW MISSION
-                  </button>
-                </div>
+              {/* Tri-Phase Task Sections */}
+              <section className="space-y-12">
+                {[
+                  { id: 'todo', label: 'DAILY_COMMAND', color: 'text-cyan-400' },
+                  { id: 'in-progress', label: 'ACTIVE_OPS', color: 'text-yellow-400' },
+                  { id: 'done', label: 'COMPLETED_MANDATES', color: 'text-green-400' }
+                ].map((phase) => {
+                  const phaseTasks = tasks.filter(t => t.status === phase.id);
+                  if (phaseTasks.length === 0 && phase.id !== 'todo') return null;
 
-                <div className="space-y-3">
-                  {tasks.map((task) => (
-                    <motion.div 
-                      layout
-                      key={task.id}
-                      className={`glass-panel p-4 rounded-xl flex items-center justify-between hover:border-cyan-500/40 transition-all cursor-pointer group ${task.status === 'done' ? 'opacity-50 grayscale-[0.5]' : ''}`}
-                      onClick={() => updateTaskStatus(task.id, task.status === 'done' ? 'todo' : 'done')}
-                    >
-                      <div className="flex items-center space-x-5 flex-1">
-                        <div className={`w-6 h-6 border-2 transition-all flex items-center justify-center rounded shrink-0 ${task.status === 'done' ? 'bg-cyan-500 border-cyan-500' : 'border-cyan-500/50 group-hover:border-cyan-400'}`}>
-                          {task.status === 'done' && <Check className="w-4 h-4 text-black" />}
+                  return (
+                    <div key={phase.id} className="space-y-4">
+                      <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-1 h-4 rounded-full bg-current ${phase.color}`} />
+                          <h3 className={`text-[10px] font-mono font-black tracking-[0.3em] uppercase ${phase.color}`}>
+                            {phase.label} <span className="opacity-40">[{phaseTasks.length}]</span>
+                          </h3>
                         </div>
-                        
-                        {task.image_url && (
-                          <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40 shrink-0 hidden sm:block">
-                            <img src={task.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="Mission Intel" />
-                          </div>
+                        {phase.id === 'todo' && (
+                          <button 
+                            onClick={() => setIsModalOpen(true)}
+                            className="bg-primary-container text-black font-mono font-bold text-[10px] px-5 py-2.5 rounded-lg hover:shadow-[0_0_25px_rgba(0,242,255,0.4)] hover:scale-105 active:scale-95 transition-all tracking-widest uppercase"
+                          >
+                            + NEW MISSION
+                          </button>
                         )}
+                      </div>
 
-                        <div className="flex-1 min-w-0">
-                          <h4 className={`text-white font-semibold truncate transition-all ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</h4>
-                          <p className="text-slate-500 text-[11px] font-medium font-mono truncate">
-                            {task.notes ? `Log: ${task.notes.substring(0, 30)}...` : `Tactical • ${task.status === 'done' ? 'Completed' : 'Due in 2 hours'}`}
-                          </p>
-                        </div>
+                      <div className="space-y-3">
+                        {phaseTasks.map((task) => (
+                          <motion.div 
+                            layout
+                            key={task.id}
+                            className={`glass-panel p-4 rounded-xl flex items-center justify-between hover:border-cyan-500/40 transition-all cursor-pointer group ${task.status === 'done' ? 'opacity-50 grayscale-[0.5]' : ''}`}
+                            onClick={() => {
+                              const nextStatus: any = task.status === 'todo' ? 'in-progress' : task.status === 'in-progress' ? 'done' : 'todo';
+                              updateTaskStatus(task.id, nextStatus);
+                            }}
+                          >
+                            <div className="flex items-center space-x-5 flex-1">
+                              <div className={`w-6 h-6 border-2 transition-all flex items-center justify-center rounded shrink-0 ${
+                                task.status === 'done' ? 'bg-green-500 border-green-500' : 
+                                task.status === 'in-progress' ? 'bg-yellow-500/20 border-yellow-500' :
+                                'border-cyan-500/50 group-hover:border-cyan-400'
+                              }`}>
+                                {task.status === 'done' && <Check className="w-4 h-4 text-black" />}
+                                {task.status === 'in-progress' && <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />}
+                              </div>
+                              
+                              {task.image_url && (
+                                <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40 shrink-0 hidden sm:block">
+                                  <img src={task.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="Mission Intel" />
+                                </div>
+                              )}
+
+                              <div className="flex-1 min-w-0">
+                                <h4 className={`text-white font-semibold truncate transition-all ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</h4>
+                                <p className="text-slate-500 text-[11px] font-medium font-mono truncate">
+                                  {task.module ? `[${task.module}] • ` : ''}
+                                  {task.status === 'done' ? 'Mandate Completed' : task.status === 'in-progress' ? 'Tactical Execution Active' : 'Awaiting Deployment'}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-5 ml-4">
+                              {task.status !== 'done' ? (
+                                <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded tracking-widest shrink-0 ${
+                                  task.priority === 'high' ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-400 bg-white/5'
+                                }`}>
+                                  {task.priority.toUpperCase()} PRIORITY
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-mono font-bold text-slate-500 tracking-widest shrink-0">+150 XP</span>
+                              )}
+                              <button className="text-slate-500 hover:text-white transition-colors">
+                                <MoreVertical className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </motion.div>
+                        ))}
                       </div>
-                      
-                      <div className="flex items-center space-x-5 ml-4">
-                        {task.status !== 'done' ? (
-                          <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded tracking-widest shrink-0 ${
-                            task.priority === 'high' ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-400 bg-white/5'
-                          }`}>
-                            {task.priority.toUpperCase()} PRIORITY
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-mono font-bold text-slate-500 tracking-widest shrink-0">+150 XP</span>
-                        )}
-                        <button className="text-slate-500 hover:text-white transition-colors">
-                          <MoreVertical className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+                    </div>
+                  );
+                })}
               </section>
             </>
           )}
