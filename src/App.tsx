@@ -64,8 +64,23 @@ function App() {
     
     // Fetch user data from Supabase
     const fetchData = async () => {
-      const { data: tasksData } = await supabase.from('tasks').select('*').eq('user_id', session.user.id);
-      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+      const { data: tasksData, error: tasksError } = await supabase.from('tasks').select('*').eq('user_id', session.user.id);
+      
+      // Safety: Try to get profile, if it doesn't exist, create it
+      let { data: profileData, error: profileError } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+      
+      if (profileError && profileError.code === 'PGRST116') {
+        // Profile doesn't exist, initialize it
+        const { data: newProfile, error: initError } = await supabase
+          .from('profiles')
+          .insert([{ id: session.user.id, email: session.user.email, xp: 0, level: 1, streak: 0 }])
+          .select()
+          .single();
+        if (initError) console.error("Profile Init Error:", initError);
+        profileData = newProfile;
+      }
+      
+      if (tasksError) console.error("Tasks Fetch Error:", tasksError);
       
       if (tasksData) setTasks(tasksData);
       if (profileData) {
@@ -81,24 +96,33 @@ function App() {
   const handleSaveTask = async (taskData: any) => {
     if (!session) return;
 
-    if (editingTask) {
-      const { data } = await supabase
-        .from('tasks')
-        .update(taskData)
-        .eq('id', editingTask.id)
-        .select()
-        .single();
-      if (data) setTasks(tasks.map(t => t.id === editingTask.id ? data : t));
-    } else {
-      const { data } = await supabase
-        .from('tasks')
-        .insert([{ ...taskData, user_id: session.user.id, status: 'todo' }])
-        .select()
-        .single();
-      if (data) setTasks([...tasks, data]);
+    try {
+      if (editingTask) {
+        const { data, error } = await supabase
+          .from('tasks')
+          .update(taskData)
+          .eq('id', editingTask.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        if (data) setTasks(tasks.map(t => t.id === editingTask.id ? data : t));
+      } else {
+        const { data, error } = await supabase
+          .from('tasks')
+          .insert([{ ...taskData, user_id: session.user.id, status: 'todo' }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        if (data) setTasks([...tasks, data]);
+      }
+      setEditingTask(null);
+      setIsModalOpen(false);
+    } catch (err: any) {
+      console.error("MISSION_SAVE_FAILURE:", err.message);
+      alert("MISSION FAILURE: " + err.message);
     }
-    setEditingTask(null);
-    setIsModalOpen(false);
   };
 
   const updateTaskStatus = async (id: string, status: Status) => {
