@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trophy, Zap, Target, Award, ShieldCheck, Edit3, Upload, Globe, Save, X } from 'lucide-react';
+import { Trophy, Zap, Target, Award, ShieldCheck, Edit3, Upload, Globe, Save } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Task } from '../types';
@@ -79,8 +79,7 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
       .from('profiles')
       .update({ 
         full_name: fullName,
-        social_links: socials,
-        custom_modules: modules
+        social_links: socials
       })
       .eq('id', userId);
 
@@ -88,10 +87,6 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
       onUpdate();
       setIsEditing(false);
     }
-  };
-
-  const removeModule = (m: string) => {
-    // Migrated to Settings
   };
 
   return (
