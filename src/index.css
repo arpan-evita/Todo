@@ -80,6 +80,25 @@ html, body, #root {
     background: radial-gradient(circle at top right, #0a0a15, #000000);
 }
 
+/* IRONCLAD GRID SYSTEM */
+.iron-grid-12 {
+    display: grid !important;
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    gap: 32px !important;
+}
+
+@media (min-width: 1024px) {
+    .iron-grid-12 {
+        grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    }
+    .iron-col-8 {
+        grid-column: span 8 / span 8 !important;
+    }
+    .iron-col-4 {
+        grid-column: span 4 / span 4 !important;
+    }
+}
+
 /* TYPOGRAPHY ANCHORS */
 .daily-command-header {
     font-size: 28px !important;

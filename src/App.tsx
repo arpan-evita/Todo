@@ -279,9 +279,9 @@ function App() {
       <main className="main-mission-stage">
         <div className="max-w-[1600px] mx-auto">
           {activeTab === 'board' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="iron-grid-12">
               {/* LEFT: MISSION HUB */}
-              <div className="lg:col-span-8 space-y-8">
+              <div className="iron-col-8 space-y-8">
                 {/* Supreme Rank Card */}
                 <section className="hidden lg:block relative p-8 rounded-3xl bg-[#080808] border border-white/5 overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-600/5"></div>
@@ -356,7 +356,7 @@ function App() {
               </div>
 
               {/* RIGHT: INTEL WING */}
-              <aside className="lg:col-span-4 space-y-8 hidden lg:block">
+              <aside className="iron-col-4 space-y-8 hidden lg:block">
                 <section className="relative p-10 rounded-3xl bg-[#080808] border border-white/5 overflow-hidden text-center group">
                   <div className="relative z-10">
                     <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-8">
