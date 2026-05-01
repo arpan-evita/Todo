@@ -108,22 +108,31 @@ function App() {
     setEditingTask(null);
   };
 
-  const updateTaskStatus = async (id: string, status: Status) => {
+  const updateTaskStatus = async (id: string, newStatus: Status) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    
+    const oldStatus = task.status;
     const { error } = await supabase.from('tasks').update({ 
-      status, 
-      completed_at: status === 'done' ? new Date().toISOString() : null 
+      status: newStatus, 
+      completed_at: newStatus === 'done' ? new Date().toISOString() : null 
     }).eq('id', id);
     
     if (!error) {
-      if (status === 'done') grantXp(150);
+      const taskXp = task.xp || 150;
+      // Transactional XP logic: Add if moving to done, remove if moving away from done
+      if (newStatus === 'done' && oldStatus !== 'done') {
+        grantXp(taskXp);
+      } else if (oldStatus === 'done' && newStatus !== 'done') {
+        grantXp(-taskXp);
+      }
       fetchTasks();
     }
   };
 
   const grantXp = async (amount: number) => {
-    const newXp = xp + amount;
-    let newLevel = level;
-    if (Math.floor(newXp / 5000) > Math.floor(xp / 5000)) newLevel = level + 1;
+    const newXp = Math.max(0, xp + amount);
+    const newLevel = Math.floor(newXp / 5000) + 1;
     
     setXp(newXp);
     setLevel(newLevel);
@@ -366,7 +375,7 @@ function App() {
                                   {task.priority.toUpperCase()} PRIORITY
                                 </span>
                               ) : (
-                                <span className="text-[10px] font-mono font-bold text-slate-500 tracking-widest shrink-0">+150 XP</span>
+                                <span className="text-[10px] font-mono font-bold text-slate-500 tracking-widest shrink-0">+{task.xp || 150} XP</span>
                               )}
                               <button className="text-slate-500 hover:text-white transition-colors">
                                 <MoreVertical className="w-5 h-5" />

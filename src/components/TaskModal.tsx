@@ -19,6 +19,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
   const [module, setModule] = useState('SEO');
   const [dueDate, setDueDate] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [xp, setXp] = useState(150);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setModule(editingTask.module || 'SEO');
       setDueDate(editingTask.due_date?.split('T')[0] || '');
       setImageUrl(editingTask.image_url || '');
+      setXp(editingTask.xp || 150);
     } else {
       setTitle('');
       setDescription('');
@@ -36,6 +38,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setModule('SEO');
       setDueDate('');
       setImageUrl('');
+      setXp(150);
     }
   }, [editingTask, isOpen]);
 
@@ -79,6 +82,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       module,
       due_date: dueDate ? new Date(dueDate).toISOString() : undefined,
       image_url: imageUrl,
+      xp: Number(xp),
     });
   };
 
@@ -137,13 +141,13 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-500 tracking-[0.1em] uppercase">MODULE</label>
                   <select 
                     value={module}
                     onChange={(e) => setModule(e.target.value)}
-                    className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-[#00f2ff]/50 transition-all text-xs appearance-none cursor-pointer"
+                    className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-[#00f2ff]/50 transition-all text-[10px] appearance-none cursor-pointer"
                   >
                     <option value="SEO">SEO</option>
                     <option value="Development">Development</option>
@@ -156,7 +160,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
                   <select 
                     value={priority}
                     onChange={(e) => setPriority(e.target.value as Priority)}
-                    className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-[#00f2ff]/50 transition-all text-xs appearance-none cursor-pointer"
+                    className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-[#00f2ff]/50 transition-all text-[10px] appearance-none cursor-pointer"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -164,12 +168,21 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
                   </select>
                 </div>
                 <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-500 tracking-[0.1em] uppercase">MISSION_BOUNTY (XP)</label>
+                  <input 
+                    type="number" 
+                    value={xp}
+                    onChange={(e) => setXp(Number(e.target.value))}
+                    className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-[#00f2ff]/50 transition-all text-[10px] cursor-pointer"
+                  />
+                </div>
+                <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-500 tracking-[0.1em] uppercase">DUE DATE</label>
                   <input 
                     type="date" 
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-[#00f2ff]/50 transition-all text-xs cursor-pointer"
+                    className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-[#00f2ff]/50 transition-all text-[10px] cursor-pointer"
                   />
                 </div>
               </div>

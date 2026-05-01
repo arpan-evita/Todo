@@ -14,4 +14,5 @@ export interface Task {
   image_url?: string;
   notes?: string;
   module?: string;
+  xp?: number;
 }
