@@ -13,6 +13,5 @@ export interface Task {
   completedAt?: string;
   image_url?: string;
   notes?: string;
-  client?: string;
   module?: string;
 }

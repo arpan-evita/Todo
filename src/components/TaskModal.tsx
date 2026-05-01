@@ -14,7 +14,6 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
-  const [client, setClient] = useState('');
   const [module, setModule] = useState('SEO');
   const [dueDate, setDueDate] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -24,7 +23,6 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setTitle(editingTask.title);
       setDescription(editingTask.description || '');
       setPriority(editingTask.priority);
-      setClient(editingTask.client || '');
       setModule(editingTask.module || 'SEO');
       setDueDate(editingTask.dueDate?.split('T')[0] || '');
       setImageUrl(editingTask.image_url || '');
@@ -32,7 +30,6 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setTitle('');
       setDescription('');
       setPriority('medium');
-      setClient('');
       setModule('SEO');
       setDueDate('');
       setImageUrl('');
@@ -47,7 +44,6 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       title,
       description,
       priority,
-      client,
       module,
       dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
       image_url: imageUrl,
@@ -109,20 +105,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 tracking-[0.1em] uppercase">CLIENT</label>
-                  <select 
-                    value={client}
-                    onChange={(e) => setClient(e.target.value)}
-                    className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-[#00f2ff]/50 transition-all text-xs appearance-none cursor-pointer"
-                  >
-                    <option value="">Select Client</option>
-                    <option value="AVC-INDIA">AVC-INDIA</option>
-                    <option value="GLOBAL-TECH">GLOBAL-TECH</option>
-                    <option value="ELITE-CORP">ELITE-CORP</option>
-                  </select>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-500 tracking-[0.1em] uppercase">MODULE</label>
                   <select 
@@ -136,9 +119,6 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
                     <option value="Social">Social</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-500 tracking-[0.1em] uppercase">PRIORITY</label>
                   <select 
