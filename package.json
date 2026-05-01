@@ -9,12 +9,12 @@
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "vercel-build": "npm run build -w @autogrowx/web",
+    "vercel-build": "npm run build -w @autogrowx/web && mkdir -p dist && cp -r apps/web/dist/* dist/",
     "db:generate": "npm run generate --workspace=@autogrowx/database",
     "db:push": "npm run push --workspace=@autogrowx/database"
   },
   "dependencies": {
-    "next": "15.1.0",
+    "next": "15.1.6",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "@supabase/supabase-js": "^2.43.4",
