@@ -8,9 +8,9 @@ export interface Task {
   priority: Priority;
   status: Status;
   category: string;
-  dueDate?: string;
-  createdAt: string;
-  completedAt?: string;
+  due_date?: string;
+  created_at: string;
+  completed_at?: string;
   image_url?: string;
   notes?: string;
   module?: string;

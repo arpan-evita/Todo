@@ -27,7 +27,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setDescription(editingTask.description || '');
       setPriority(editingTask.priority);
       setModule(editingTask.module || 'SEO');
-      setDueDate(editingTask.dueDate?.split('T')[0] || '');
+      setDueDate(editingTask.due_date?.split('T')[0] || '');
       setImageUrl(editingTask.image_url || '');
     } else {
       setTitle('');
@@ -77,7 +77,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       description,
       priority,
       module,
-      dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
+      due_date: dueDate ? new Date(dueDate).toISOString() : undefined,
       image_url: imageUrl,
     });
   };
