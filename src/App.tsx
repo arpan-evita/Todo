@@ -81,7 +81,7 @@ function App() {
     if (!error && data) {
       setXp(data.xp || 0);
       setLevel(data.level || 1);
-      setStreak(data.streak || 0);
+      // We don't set streak here anymore, fetchTasks handles it dynamically
       setProfile({
         full_name: data.full_name || '',
         avatar_url: data.avatar_url || '',
@@ -104,6 +104,7 @@ function App() {
     const today = new Date().toDateString();
     const yesterday = new Date(Date.now() - 86400000).toDateString();
 
+    // Check if the latest completion is today or yesterday
     if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 0;
 
     let currentStreak = 0;
@@ -125,7 +126,10 @@ function App() {
     const { data, error } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
     if (!error && data) {
       setTasks(data);
-      setStreak(calculateStreak(data));
+      const newStreak = calculateStreak(data);
+      setStreak(newStreak);
+      // Persist the calculated streak back to DB if it changed
+      await supabase.from('profiles').update({ streak: newStreak }).eq('id', session.user.id);
     }
   };
 
