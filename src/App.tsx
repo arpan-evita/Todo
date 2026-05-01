@@ -23,6 +23,7 @@ import Reports from './components/Reports';
 import TaskModal from './components/TaskModal';
 import Leaderboard from './components/Leaderboard';
 import Login from './components/Login';
+import { calculateLevel, getIdentity, getPhase, getNextLevelXp } from './gameLogic';
 
 import type { Task, Status } from './types';
 
@@ -40,10 +41,12 @@ function App() {
     full_name: string;
     avatar_url: string;
     social_links: any;
+    mode: string;
   }>({
     full_name: '',
     avatar_url: '',
-    social_links: {}
+    social_links: {},
+    mode: 'Builder'
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,12 +83,13 @@ function App() {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
     if (!error && data) {
       setXp(data.xp || 0);
-      setLevel(data.level || 1);
+      setLevel(calculateLevel(data.xp || 0));
       // We don't set streak here anymore, fetchTasks handles it dynamically
       setProfile({
         full_name: data.full_name || '',
         avatar_url: data.avatar_url || '',
-        social_links: data.social_links || {}
+        social_links: data.social_links || {},
+        mode: data.mode || 'Builder'
       });
     }
   };
@@ -128,8 +132,10 @@ function App() {
       setTasks(data);
       const newStreak = calculateStreak(data);
       setStreak(newStreak);
-      // Persist the calculated streak back to DB if it changed
-      await supabase.from('profiles').update({ streak: newStreak }).eq('id', session.user.id);
+      
+      const newLevel = calculateLevel(xp);
+      setLevel(newLevel);
+      await supabase.from('profiles').update({ streak: newStreak, level: newLevel }).eq('id', session.user.id);
     }
   };
 
@@ -172,11 +178,18 @@ function App() {
     
     if (!error) {
       const taskXp = task.xp || 150;
-      // Transactional XP logic: Add if moving to done, remove if moving away from done
+      // Transactional XP logic with Streak Multiplier
+      let multiplier = 1;
+      if (streak >= 30) multiplier = 1.5;
+      else if (streak >= 7) multiplier = 1.25;
+      else if (streak >= 3) multiplier = 1.1;
+
+      const finalXp = Math.round(taskXp * multiplier);
+
       if (newStatus === 'done' && oldStatus !== 'done') {
-        grantXp(taskXp);
+        grantXp(finalXp);
       } else if (oldStatus === 'done' && newStatus !== 'done') {
-        grantXp(-taskXp);
+        grantXp(-finalXp);
       }
       fetchTasks();
     }
@@ -184,7 +197,7 @@ function App() {
 
   const grantXp = async (amount: number) => {
     const newXp = Math.max(0, xp + amount);
-    const newLevel = Math.floor(newXp / 5000) + 1;
+    const newLevel = calculateLevel(newXp);
     
     setXp(newXp);
     setLevel(newLevel);
@@ -218,14 +231,14 @@ function App() {
       {/* LUXURY HEADER */}
       <header className="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center h-16 px-8 shadow-[0_0_15px_rgba(0,242,255,0.1)]">
         <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 tracking-tighter uppercase font-sans">
-          ARPAN-TODO
+          AUTOGROWX: MISSION CONTROL
         </div>
 
         <div className="hidden md:flex items-center bg-white/5 border border-white/10 rounded-lg px-4 py-2 w-96 hover:border-cyan-500/50 transition-all duration-300 group">
           <Search className="w-4 h-4 text-slate-400 mr-2 group-hover:text-cyan-400 transition-colors" />
           <input 
             type="text" 
-            placeholder="QUERY DATABASE..." 
+            placeholder="QUERY MISSION DATABASE..." 
             className="bg-transparent border-none outline-none text-[10px] font-mono font-bold tracking-widest text-white placeholder-slate-500 w-full"
           />
         </div>
@@ -264,8 +277,8 @@ function App() {
             <Cpu className="w-5 h-5 text-black" />
           </div>
           <div>
-            <p className="font-mono text-[10px] font-bold text-cyan-400 uppercase tracking-widest">OPERATOR</p>
-            <p className="text-[10px] text-slate-500">Elite Commander</p>
+            <p className="font-mono text-[10px] font-bold text-cyan-400 uppercase tracking-widest">COMMANDER</p>
+            <p className="text-[11px] font-bold text-white uppercase">{getIdentity(level)}</p>
           </div>
         </div>
 
@@ -308,7 +321,7 @@ function App() {
                   exit={{ opacity: 0, x: -10 }}
                   className="ml-4 font-mono text-[11px] font-bold uppercase tracking-widest whitespace-nowrap"
                 >
-                  Logout
+                  TERMINATE
                 </motion.span>
               )}
             </AnimatePresence>
@@ -335,29 +348,31 @@ function App() {
                 
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                   <div>
-                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-none mb-2">CYBER_KNIGHT</h2>
+                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-none mb-2 italic uppercase">
+                      {getIdentity(level)}
+                    </h2>
                     <p className="text-cyan-400 font-mono text-[11px] font-bold tracking-[0.2em] uppercase">
-                      RANK: SUPREME COMMANDER • SYSTEM INTEGRITY 98%
+                      PHASE: {getPhase(level).name} • SYSTEM INTEGRITY 98%
                     </p>
                   </div>
                   <div className="text-left md:text-right">
-                    <p className="text-slate-400 font-mono text-[10px] font-bold tracking-widest mb-1">NEXT LEVEL IN</p>
-                    <p className="text-3xl font-black text-white tracking-tight">{5000 - (xp % 5000)} XP</p>
+                    <p className="text-slate-400 font-mono text-[10px] font-bold tracking-widest mb-1 uppercase">NEXT IDENTITY SHIFT</p>
+                    <p className="text-3xl font-black text-white tracking-tight">{getPhase(level).xpGoal - xp > 0 ? getPhase(level).xpGoal - xp : 0} XP</p>
                   </div>
                 </div>
 
                 <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden mb-3 cyber-glow-inner">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${xpProgress}%` }}
+                    animate={{ width: `${Math.min(100, (xp / getPhase(level).xpGoal) * 100)}%` }}
                     transition={{ duration: 1.5, ease: "easeOut" }}
                     className="h-full bg-gradient-to-r from-cyan-400 via-cyan-300 to-purple-600 xp-bar-glow"
                   />
                 </div>
                 
                 <div className="flex justify-between text-[10px] font-mono font-bold text-slate-500 tracking-wider">
-                  <span>{xp % 5000} / 5,000 XP</span>
-                  <span className="text-cyan-400 group-hover:text-white transition-colors duration-500">{Math.round(xpProgress)}% COMPLETE</span>
+                  <span>{xp.toLocaleString()} / {getPhase(level).xpGoal.toLocaleString()} XP</span>
+                  <span className="text-cyan-400 group-hover:text-white transition-colors duration-500 uppercase">{getPhase(level).name} PHASE</span>
                 </div>
               </motion.section>
 
