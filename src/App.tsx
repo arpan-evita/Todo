@@ -8,7 +8,6 @@ import {
   User
 } from 'lucide-react';
 import { supabase } from './supabaseClient';
-import TaskBoard from './components/TaskBoard';
 import LevelBoard from './components/LevelBoard';
 import Reports from './components/Reports';
 import TaskModal from './components/TaskModal';
@@ -301,12 +300,12 @@ function App() {
                       <div className="h-2.5 bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
                         <div 
                           className="h-full bg-gradient-to-r from-cyan-400 via-cyan-500 to-purple-600 rounded-full shadow-[0_0_20px_rgba(0,242,255,0.4)] transition-all duration-1000" 
-                          style={{ width: `72%` }}
+                          style={{ width: `${xpProgress}%` }}
                         ></div>
                       </div>
                       <div className="flex justify-between text-[10px] font-label-caps text-slate-500 tracking-widest uppercase">
-                        <span>3,750 / 5,000 XP</span>
-                        <span className="text-white/60">72% COMPLETE</span>
+                        <span>{xp % 15000} / 5,000 XP</span>
+                        <span className="text-white/60">{Math.round(xpProgress)}% COMPLETE</span>
                       </div>
                     </div>
                   </div>
