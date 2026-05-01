@@ -30,6 +30,7 @@ import TaskModal from '../components/TaskModal';
 import Leaderboard from '../components/Leaderboard';
 import Reports from '../components/Reports';
 import LevelBoard from '../components/LevelBoard';
+import Login from '../components/Login';
 
 const PILOT_IMG = "https://lh3.googleusercontent.com/aida-public/AB6AXuAh40g38_asydALJucbCa8FKAn_yk3LmmWOCj_t4mEtMW0xziM3cocNSjd-naohafI7akNLwzINnSboGd8BdzW_us1r3PoOwfBFcjMshG_67MrEPOUYCpZyagfMkJ6qwx45AKwHiIZGEQFPgLCrvzHpl6HhOdnfu14wjfgyFtXT7cuXAhETVHPfj-2LXxyE3HFrFyAwNg6rjE6LMETh4TSO6UEXsNwSIIUfCFKeP6_SPJD_1u8knrUFj021u-wo2Ij12j1wpT0JXS2a";
 
@@ -168,7 +169,7 @@ export default function Dashboard() {
   };
 
   if (loading) return <div className="min-h-screen bg-[#050508] flex flex-col items-center justify-center space-y-4"><Cpu className="animate-pulse text-[#00f2ff]" size={48} /><p className="text-[10px] font-mono font-bold text-[#00f2ff] tracking-[0.3em] uppercase">Initializing Neural Link...</p></div>;
-  if (!session) return <div className="min-h-screen bg-[#050508] text-white p-20 text-center"><h1 className="text-4xl font-black italic mb-4">ACCESS DENIED</h1><p className="text-slate-500 uppercase font-bold text-xs tracking-widest">Neural connection required. Please login via primary terminal.</p></div>;
+  if (!session) return <Login />;
 
   return (
     <div className="min-h-screen bg-[#050508] text-white font-sans selection:bg-[#00f2ff]/30">

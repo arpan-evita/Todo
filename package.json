@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "vercel-build": "turbo build --filter=@autogrowx/web",
+    "vercel-build": "npm run build -w @autogrowx/web",
     "db:generate": "npm run generate --workspace=@autogrowx/database",
     "db:push": "npm run push --workspace=@autogrowx/database"
   },
