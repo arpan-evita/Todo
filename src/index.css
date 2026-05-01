@@ -1,6 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary-container: #00f2ff;
+  --color-secondary-container: #7000ff;
+  --color-background: #050505;
+  
+  --font-display-xl: "Inter", sans-serif;
+  --font-label-caps: "Space Grotesk", sans-serif;
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700&display=swap');
 
