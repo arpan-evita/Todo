@@ -240,8 +240,15 @@ function App() {
               <Settings className="w-5 h-5" />
             </button>
           </div>
-          <div className="w-10 h-10 rounded-full border border-cyan-400/50 overflow-hidden ring-2 ring-transparent hover:ring-cyan-400/50 transition-all cursor-pointer">
-            <img src={PILOT_IMG} alt="Pilot Avatar" className="w-full h-full object-cover" />
+          <div 
+            onClick={() => setActiveTab('profile')}
+            className="w-10 h-10 rounded-full border border-cyan-400/50 overflow-hidden ring-2 ring-transparent hover:ring-cyan-400/50 transition-all cursor-pointer group"
+          >
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} alt="Operative" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+            ) : (
+              <img src={PILOT_IMG} alt="Pilot Avatar" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+            )}
           </div>
         </div>
       </header>
