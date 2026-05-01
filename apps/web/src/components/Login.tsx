@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
-import { Cpu, Mail, Chrome, Bolt, ArrowRight } from 'lucide-react';
+import { Cpu, Mail, Globe, Bolt, ArrowRight } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -54,7 +54,7 @@ export default function Login() {
             onClick={handleGoogleLogin}
             className="w-full h-14 bg-white text-black font-black uppercase text-xs tracking-widest rounded-xl flex items-center justify-center space-x-3 hover:bg-slate-200 transition-all active:scale-95"
           >
-            <Chrome size={20} />
+            <Globe size={20} />
             <span>Sync with Google Intelligence</span>
           </button>
 
