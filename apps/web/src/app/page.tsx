@@ -27,6 +27,7 @@ import { supabase } from '../lib/supabase';
 import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAndPenalties } from '../lib/gameLogic';
 import { checkNewAchievements } from '../lib/achievements';
 import type { Task, Status } from '../lib/types';
+import { initNotifications, sendNotification } from '../lib/notifications';
 
 import TaskModal from '../components/TaskModal';
 import Leaderboard from '../components/Leaderboard';
@@ -70,7 +71,10 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    if (session) initialize();
+    if (session) {
+      initialize();
+      initNotifications(); // Request permissions for Web/APK
+    }
   }, [session]);
 
   const initialize = async () => {
@@ -125,12 +129,14 @@ export default function Dashboard() {
       if (newStatus === 'done' && oldStatus !== 'done') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         grantXp(finalXp);
+        sendNotification('MISSION ACCOMPLISHED', `Mandate "${task.title}" secured. +${finalXp} XP acquired.`);
       } else if (oldStatus === 'done' && newStatus !== 'done') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         grantXp(-finalXp);
       }
       fetchTasks();
     }
+
   };
 
   const grantXp = async (amount: number) => {
@@ -149,7 +155,9 @@ export default function Dashboard() {
       for (const ach of newAchievements) {
         await supabase.from('user_achievements').insert([{ user_id: session.user.id, achievement_id: ach.id }]);
         alert(`MISSION ACCOMPLISHED: Unlocked "${ach.title}"!`);
+        sendNotification('NEW ACHIEVEMENT UNLOCKED', `You have been awarded the "${ach.title}" medal.`);
       }
+
     }
   };
 
