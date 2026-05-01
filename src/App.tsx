@@ -23,7 +23,7 @@ import Reports from './components/Reports';
 import TaskModal from './components/TaskModal';
 import Leaderboard from './components/Leaderboard';
 import Login from './components/Login';
-import { calculateLevel, getIdentity, getPhase, getNextLevelXp } from './gameLogic';
+import { calculateLevel, getIdentity, getPhase } from './gameLogic';
 
 import type { Task, Status } from './types';
 
@@ -204,7 +204,6 @@ function App() {
     await supabase.from('profiles').update({ xp: newXp, level: newLevel }).eq('id', session.user.id);
   };
 
-  const xpProgress = (xp % 5000) / 50;
 
   if (loading) {
     return (
