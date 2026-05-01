@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Upload, Image as ImageIcon } from 'lucide-react';
 import type { Task, Priority } from '../types';
 
+import { supabase } from '../supabaseClient';
+
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +19,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
   const [module, setModule] = useState('SEO');
   const [dueDate, setDueDate] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (editingTask) {
@@ -35,6 +38,35 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setImageUrl('');
     }
   }, [editingTask, isOpen]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      if (!e.target.files || e.target.files.length === 0) return;
+
+      const file = e.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `tasks/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('task-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('task-images')
+        .getPublicUrl(filePath);
+
+      setImageUrl(publicUrl);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Tactical Upload Failed: Ensure "task-images" bucket exists and is public.');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,15 +191,27 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <label className="text-[10px] font-bold text-slate-500 tracking-[0.1em] uppercase">ATTACHED SCREENSHOTS</label>
-                  <button type="button" className="flex items-center space-x-2 px-3 py-1.5 bg-[#00f2ff]/10 text-[#00f2ff] border border-[#00f2ff]/20 rounded-lg text-[10px] font-bold hover:bg-[#00f2ff]/20 transition-all">
+                  <label className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${uploading ? 'bg-slate-800 text-slate-500' : 'bg-[#00f2ff]/10 text-[#00f2ff] border border-[#00f2ff]/20 hover:bg-[#00f2ff]/20'}`}>
                     <Upload size={12} />
-                    <span>UPLOAD</span>
-                  </button>
+                    <span>{uploading ? 'UPLOADING...' : 'UPLOAD'}</span>
+                    <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" disabled={uploading} />
+                  </label>
                 </div>
                 
-                <div className="border-2 border-dashed border-white/5 rounded-2xl p-12 flex flex-col items-center justify-center text-center bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer">
-                  <ImageIcon size={40} className="text-slate-700 mb-4" />
-                  <p className="text-slate-600 text-[11px] font-medium">No screenshots attached yet.</p>
+                <div className="border-2 border-dashed border-white/5 rounded-2xl p-6 flex flex-col items-center justify-center text-center bg-white/[0.01] hover:bg-white/[0.03] transition-all relative overflow-hidden group">
+                  {imageUrl ? (
+                    <div className="w-full h-48 relative">
+                      <img src={imageUrl} className="w-full h-full object-cover rounded-lg opacity-60" alt="Tactical Preview" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <p className="text-[10px] font-bold text-white uppercase tracking-widest">Image Attached</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <ImageIcon size={32} className="text-slate-700 mb-3" />
+                      <p className="text-slate-600 text-[10px] font-medium">No screenshots attached yet.</p>
+                    </>
+                  )}
                 </div>
               </div>
 
