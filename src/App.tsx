@@ -4,8 +4,8 @@ import {
   Bell, 
   Settings, 
   LayoutGrid, 
-  Target, 
-  Users, 
+  Trophy, 
+  User, 
   BarChart3, 
   Power, 
   Check, 
@@ -189,10 +189,10 @@ function App() {
   if (!session) return <Login />;
 
   const navItems = [
-    { id: 'board', icon: LayoutGrid, label: 'Command' },
-    { id: 'levels', icon: Target, label: 'Objectives' },
-    { id: 'reports', icon: BarChart3, label: 'Intel' },
-    { id: 'profile', icon: Users, label: 'Squad' },
+    { id: 'board', icon: LayoutGrid, label: 'Dashboard' },
+    { id: 'levels', icon: Trophy, label: 'Leaderboard' },
+    { id: 'reports', icon: BarChart3, label: 'Report' },
+    { id: 'profile', icon: User, label: 'Your Details' },
   ];
 
   return (
