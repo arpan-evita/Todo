@@ -84,10 +84,25 @@ function App() {
   const handleSaveTask = async (taskData: Partial<Task>) => {
     if (editingTask) {
       const { error } = await supabase.from('tasks').update(taskData).eq('id', editingTask.id);
-      if (!error) fetchTasks();
+      if (error) {
+        console.error('Update Error:', error);
+        alert(`Sync Failed: ${error.message}`);
+      } else {
+        fetchTasks();
+      }
     } else {
-      const { error } = await supabase.from('tasks').insert([{ ...taskData, user_id: session.user.id, status: 'todo' }]);
-      if (!error) fetchTasks();
+      const { error } = await supabase.from('tasks').insert([{ 
+        ...taskData, 
+        user_id: session.user.id, 
+        status: 'todo',
+        created_at: new Date().toISOString()
+      }]);
+      if (error) {
+        console.error('Insert Error:', error);
+        alert(`Deployment Failed: ${error.message}. Ensure your database columns (module, image_url, notes) are created.`);
+      } else {
+        fetchTasks();
+      }
     }
     setIsModalOpen(false);
     setEditingTask(null);
