@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Settings, Shield, Zap, Target, Bell, Eye, EyeOff, Save, Trash2, Cpu } from 'lucide-react';
+import { Shield, Zap, Target, Save, Trash2, Cpu } from 'lucide-react';
 import { supabase } from '../supabaseClient';
-import { motion } from 'framer-motion';
 
 interface SettingsProps {
   profile: {
