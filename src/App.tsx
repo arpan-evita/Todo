@@ -14,7 +14,8 @@ import {
   Flame, 
   Bolt, 
   Cloud,
-  Cpu
+  Cpu,
+  ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './supabaseClient';
@@ -55,6 +56,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+  const [activeTaskIdMenu, setActiveTaskIdMenu] = useState<string | null>(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -215,6 +217,14 @@ function App() {
     await supabase.from('profiles').update({ xp: newXp, level: newLevel }).eq('id', session.user.id);
   };
 
+  const deleteTask = async (id: string) => {
+    if (!confirm('Are you sure you want to terminate this mission?')) return;
+    const { error } = await supabase.from('tasks').delete().eq('id', id);
+    if (!error) {
+      fetchTasks();
+    }
+  };
+
 
   if (loading) {
     return (
@@ -371,21 +381,21 @@ function App() {
                   </div>
                   <div className="text-left md:text-right">
                     <p className="text-slate-400 font-mono text-[10px] font-bold tracking-widest mb-1 uppercase">NEXT IDENTITY SHIFT</p>
-                    <p className="text-3xl font-black text-white tracking-tight">{getPhase(level).xpGoal - xp > 0 ? getPhase(level).xpGoal - xp : 0} XP</p>
+                    <p className="text-3xl font-black text-white tracking-tight">{1000 - (xp % 1000)} XP</p>
                   </div>
                 </div>
 
                 <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden mb-3 cyber-glow-inner">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(100, (xp / getPhase(level).xpGoal) * 100)}%` }}
+                    animate={{ width: `${((xp % 1000) / 1000) * 100}%` }}
                     transition={{ duration: 1.5, ease: "easeOut" }}
                     className="h-full bg-gradient-to-r from-cyan-400 via-cyan-300 to-purple-600 xp-bar-glow"
                   />
                 </div>
                 
                 <div className="flex justify-between text-[10px] font-mono font-bold text-slate-500 tracking-wider">
-                  <span>{xp.toLocaleString()} / {getPhase(level).xpGoal.toLocaleString()} XP</span>
+                  <span>{(xp % 1000).toLocaleString()} / 1,000 XP</span>
                   <span className="text-cyan-400 group-hover:text-white transition-colors duration-500 uppercase">{getPhase(level).name} PHASE</span>
                 </div>
               </motion.section>
@@ -425,7 +435,11 @@ function App() {
                             layout
                             key={task.id}
                             className={`glass-panel p-4 rounded-xl flex items-center justify-between hover:border-cyan-500/40 transition-all cursor-pointer group ${task.status === 'done' ? 'opacity-50 grayscale-[0.5]' : ''}`}
-                            onClick={() => {
+                            onClick={(e) => {
+                              // If clicked on title/body but not icons, toggle status
+                              const target = e.target as HTMLElement;
+                              if (target.closest('.task-actions')) return;
+                              
                               const nextStatus: any = task.status === 'todo' ? 'in-progress' : task.status === 'in-progress' ? 'done' : 'todo';
                               updateTaskStatus(task.id, nextStatus);
                             }}
@@ -447,11 +461,29 @@ function App() {
                               )}
 
                               <div className="flex-1 min-w-0">
-                                <h4 className={`text-white font-semibold truncate transition-all ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</h4>
+                                <div className="flex items-center space-x-2">
+                                  <h4 className={`text-white font-semibold truncate transition-all ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</h4>
+                                  {task.link && (
+                                    <a 
+                                      href={task.link} 
+                                      target="_blank" 
+                                      rel="noreferrer" 
+                                      className="text-cyan-400 hover:text-white transition-colors task-actions"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <ExternalLink size={14} />
+                                    </a>
+                                  )}
+                                </div>
                                 <p className="text-slate-500 text-[11px] font-medium font-mono truncate">
                                   {task.module ? `[${task.module}] • ` : ''}
                                   {task.status === 'done' ? 'Mandate Completed' : task.status === 'in-progress' ? 'Tactical Execution Active' : 'Awaiting Deployment'}
                                 </p>
+                                <div className="flex items-center space-x-3 mt-1">
+                                  {task.description && <div className="w-1 h-1 rounded-full bg-slate-600" title="Has Notes" />}
+                                  {task.link && <div className="w-1 h-1 rounded-full bg-cyan-500" title="Has Reference" />}
+                                  {task.image_url && <div className="w-1 h-1 rounded-full bg-purple-500" title="Has Intel" />}
+                                </div>
                               </div>
                             </div>
                             
@@ -465,9 +497,50 @@ function App() {
                               ) : (
                                 <span className="text-[10px] font-mono font-bold text-slate-500 tracking-widest shrink-0">+{task.xp || 150} XP</span>
                               )}
-                              <button className="text-slate-500 hover:text-white transition-colors">
-                                <MoreVertical className="w-5 h-5" />
-                              </button>
+                              <div className="relative task-actions">
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveTaskIdMenu(activeTaskIdMenu === task.id ? null : task.id);
+                                  }}
+                                  className="text-slate-500 hover:text-white transition-colors p-1"
+                                >
+                                  <MoreVertical className="w-5 h-5" />
+                                </button>
+                                
+                                <AnimatePresence>
+                                  {activeTaskIdMenu === task.id && (
+                                    <motion.div 
+                                      initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                                      exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                                      className="absolute right-0 bottom-full mb-2 w-32 bg-black border border-white/10 rounded-lg shadow-2xl overflow-hidden z-[60]"
+                                    >
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingTask(task);
+                                          setIsModalOpen(true);
+                                          setActiveTaskIdMenu(null);
+                                        }}
+                                        className="w-full px-4 py-2 text-left text-[10px] font-bold text-slate-300 hover:bg-white/5 hover:text-cyan-400 transition-all uppercase tracking-widest"
+                                      >
+                                        Edit Intel
+                                      </button>
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          deleteTask(task.id);
+                                          setActiveTaskIdMenu(null);
+                                        }}
+                                        className="w-full px-4 py-2 text-left text-[10px] font-bold text-red-500 hover:bg-red-500/10 transition-all uppercase tracking-widest"
+                                      >
+                                        Terminate
+                                      </button>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
                             </div>
                           </motion.div>
                         ))}

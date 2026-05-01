@@ -20,6 +20,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
   const [module, setModule] = useState(modules[0] || 'General');
   const [dueDate, setDueDate] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [link, setLink] = useState('');
   const [xp, setXp] = useState(150);
   const [uploading, setUploading] = useState(false);
 
@@ -31,6 +32,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
       setModule(editingTask.module || modules[0] || 'General');
       setDueDate(editingTask.due_date?.split('T')[0] || '');
       setImageUrl(editingTask.image_url || '');
+      setLink(editingTask.link || '');
       setXp(editingTask.xp || 150);
     } else {
       setTitle('');
@@ -39,6 +41,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
       setModule(modules[0] || 'General');
       setDueDate('');
       setImageUrl('');
+      setLink('');
       setXp(150);
     }
   }, [editingTask, isOpen, modules]);
@@ -83,6 +86,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
       module,
       due_date: dueDate ? new Date(dueDate).toISOString() : undefined,
       image_url: imageUrl,
+      link,
       xp: Number(xp),
     });
   };
@@ -139,6 +143,17 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
                   placeholder="e.g., Optimize H1 Structures"
                   className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#00f2ff]/50 transition-all text-sm"
                   required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 tracking-[0.1em] uppercase">REFERENCE LINK (URL)</label>
+                <input 
+                  type="url" 
+                  value={link}
+                  onChange={(e) => setLink(e.target.value)}
+                  placeholder="https://example.com/brief"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#00f2ff]/50 transition-all text-sm"
                 />
               </div>
 

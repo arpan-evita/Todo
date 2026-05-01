@@ -39,7 +39,7 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
   const [socials, setSocials] = useState(profile.social_links);
   const [uploading, setUploading] = useState(false);
 
-  const nextLevelXp = 5000;
+  const nextLevelXp = 1000;
   const currentXp = xp % nextLevelXp;
   const progress = (currentXp / nextLevelXp) * 100;
   const completedTasks = tasks.filter(t => t.status === 'done').length;
@@ -201,13 +201,13 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
             
             <div className="w-full mt-10 relative z-10">
                <div className="flex justify-between text-[10px] font-mono font-bold text-slate-500 mb-3 uppercase tracking-widest px-1">
-                  <span>EXP: {currentXp}</span>
-                  <span className="text-cyan-400">{Math.round(progress)}% COMPLETE</span>
+                  <span>EXP: {xp % 1000} / 1000</span>
+                  <span className="text-cyan-400">{Math.round((xp % 1000) / 10)}% COMPLETE</span>
                </div>
                <div className="w-full h-4 bg-white/5 rounded-full overflow-hidden border border-white/10 p-1 cyber-glow-inner">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${progress || 5}%` }}
+                    animate={{ width: `${((xp % 1000) / 1000) * 100}%` }}
                     transition={{ duration: 1.5, ease: "easeOut" }}
                     className="h-full bg-gradient-to-r from-cyan-600 via-cyan-400 to-cyan-600 rounded-full" 
                   />

@@ -1,5 +1,6 @@
 export type Priority = 'low' | 'medium' | 'high';
 export type Status = 'todo' | 'in-progress' | 'done';
+export type MissionType = 'daily' | 'weekly' | 'boss';
 
 export interface Task {
   id: string;
@@ -7,13 +8,24 @@ export interface Task {
   description: string;
   priority: Priority;
   status: Status;
-  category: string;
+  type: MissionType;
   due_date?: string;
   created_at: string;
   completed_at?: string;
   image_url?: string;
   link?: string;
-  notes?: string;
   module?: string;
-  xp?: number;
+  xp: number;
+}
+
+export interface UserProfile {
+  id: string;
+  full_name: string;
+  avatar_url: string;
+  level: Int;
+  xp: Int;
+  streak: Int;
+  mode: string;
+  custom_modules: string[];
+  social_links: any;
 }

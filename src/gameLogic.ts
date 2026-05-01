@@ -1,9 +1,9 @@
 export const PHASES = [
-  { name: 'Awakening', range: [1, 10], xpGoal: 1000, color: '#00ff88' },
-  { name: 'Growth', range: [11, 25], xpGoal: 5000, color: '#00f2ff' },
-  { name: 'Dominance', range: [26, 50], xpGoal: 25000, color: '#7000ff' },
-  { name: 'Empire', range: [51, 75], xpGoal: 100000, color: '#ff3b30' },
-  { name: 'Legacy', range: [76, 100], xpGoal: 500000, color: '#ffcc00' },
+  { name: 'Awakening', range: [1, 10], xpGoal: 10000, color: '#00ff88' },
+  { name: 'Growth', range: [11, 25], xpGoal: 25000, color: '#00f2ff' },
+  { name: 'Dominance', range: [26, 50], xpGoal: 50000, color: '#7000ff' },
+  { name: 'Empire', range: [51, 75], xpGoal: 75000, color: '#ff3b30' },
+  { name: 'Legacy', range: [76, 100], xpGoal: 100000, color: '#ffcc00' },
 ];
 
 export const IDENTITY_TITLES: Record<number, string> = {
@@ -28,22 +28,10 @@ export const getPhase = (level: number) => {
 };
 
 export const calculateLevel = (xp: number) => {
-  // Phase 1: 0-1000 (Levels 1-10) -> 100 XP per level
-  if (xp <= 1000) return Math.min(10, Math.floor(xp / 100) + 1);
-  // Phase 2: 1001-5000 (Levels 11-25) -> 266 XP per level
-  if (xp <= 5000) return Math.min(25, 11 + Math.floor((xp - 1000) / 266));
-  // Phase 3: 5001-25000 (Levels 26-50) -> 800 XP per level
-  if (xp <= 25000) return Math.min(50, 26 + Math.floor((xp - 5000) / 800));
-  // Phase 4: 25001-100000 (Levels 51-75) -> 3000 XP per level
-  if (xp <= 100000) return Math.min(75, 51 + Math.floor((xp - 25000) / 3000));
-  // Phase 5: 100001-500000 (Levels 76-100) -> 16000 XP per level
-  return Math.min(100, 76 + Math.floor((xp - 100000) / 16000));
+  // Constant 1000 XP per level for clear, sequential progression
+  return Math.floor(xp / 1000) + 1;
 };
 
 export const getNextLevelXp = (level: number) => {
-  if (level < 10) return 100;
-  if (level < 25) return 266;
-  if (level < 50) return 800;
-  if (level < 75) return 3000;
-  return 16000;
+  return 1000;
 };
