@@ -23,6 +23,7 @@ import Reports from './components/Reports';
 import TaskModal from './components/TaskModal';
 import Leaderboard from './components/Leaderboard';
 import Login from './components/Login';
+import SettingsPage from './components/Settings';
 import { calculateLevel, getIdentity, getPhase } from './gameLogic';
 
 import type { Task, Status } from './types';
@@ -32,7 +33,7 @@ const PILOT_IMG = "https://lh3.googleusercontent.com/aida-public/AB6AXuAh40g38_a
 function App() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'board' | 'levels' | 'reports' | 'profile'>('board');
+  const [activeTab, setActiveTab] = useState<'board' | 'levels' | 'reports' | 'profile' | 'settings'>('board');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
@@ -225,7 +226,8 @@ function App() {
     { id: 'board', icon: LayoutGrid, label: 'Dashboard' },
     { id: 'levels', icon: Trophy, label: 'Leaderboard' },
     { id: 'reports', icon: BarChart3, label: 'Report' },
-    { id: 'profile', icon: User, label: 'Your Details' },
+    { id: 'profile', icon: User, label: 'Profile' },
+    { id: 'settings', icon: Settings, label: 'Settings' },
   ];
 
   return (
@@ -251,7 +253,10 @@ function App() {
               <Bell className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
             </button>
-            <button className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer">
+            <button 
+              onClick={() => setActiveTab('settings')}
+              className={`transition-colors cursor-pointer ${activeTab === 'settings' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+            >
               <Settings className="w-5 h-5" />
             </button>
           </div>
@@ -469,7 +474,24 @@ function App() {
 
           {activeTab === 'levels' && <Leaderboard currentUser={{ name: session.user.email?.split('@')[0] || 'Pilot', level, xp, img: PILOT_IMG }} />}
           {activeTab === 'reports' && <Reports tasks={tasks} />}
-          {activeTab === 'profile' && <LevelBoard xp={xp} level={level} streak={streak} tasks={tasks} profile={profile} onUpdate={fetchProfile} userId={session.user.id} />}
+          {activeTab === 'profile' && (
+            <LevelBoard 
+              xp={xp} 
+              level={level} 
+              streak={streak} 
+              tasks={tasks} 
+              profile={profile} 
+              onUpdate={fetchProfile} 
+              userId={session.user.id} 
+            />
+          )}
+          {activeTab === 'settings' && (
+            <SettingsPage 
+              profile={profile} 
+              onUpdate={fetchProfile} 
+              userId={session.user.id} 
+            />
+          )}
         </div>
 
         {/* Right Sidebar */}
