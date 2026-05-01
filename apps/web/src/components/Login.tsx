@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
-import { Cpu, Mail, Globe, Bolt, ArrowRight } from 'lucide-react';
+import { Cpu, Mail, Globe, Bolt, ArrowRight, Lock, Key } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isPasswordMode, setIsPasswordMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
@@ -16,15 +18,24 @@ export default function Login() {
     });
   };
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin }
-    });
-    if (error) alert(error.message);
-    else alert('Mission intel sent to your inbox. Check for the access code.');
+    
+    if (isPasswordMode) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) alert(error.message);
+    } else {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.origin }
+      });
+      if (error) alert(error.message);
+      else alert('Mission intel sent to your inbox. Check for the access code.');
+    }
     setLoading(false);
   };
 
@@ -63,7 +74,7 @@ export default function Login() {
             <div className="relative flex justify-center text-[10px] uppercase font-bold text-slate-500 bg-[#050508] px-4">OR SECURE TERMINAL</div>
           </div>
 
-          <form onSubmit={handleEmailLogin} className="space-y-4">
+          <form onSubmit={handleAuth} className="space-y-4">
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-[#00f2ff] transition-colors" size={18} />
               <input 
@@ -75,6 +86,25 @@ export default function Login() {
                 required
               />
             </div>
+
+            {isPasswordMode && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative group"
+              >
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-[#00f2ff] transition-colors" size={18} />
+                <input 
+                  type="password" 
+                  placeholder="ACCESS KEY (PASSWORD)..." 
+                  className="w-full h-14 bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 text-xs font-mono font-bold tracking-widest outline-none focus:border-[#00f2ff]/50 transition-all placeholder:text-slate-600"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </motion.div>
+            )}
+
             <button 
               disabled={loading}
               className="w-full h-14 bg-gradient-to-r from-[#00f2ff] to-[#7000ff] text-black font-black uppercase text-xs tracking-widest rounded-xl flex items-center justify-center space-x-3 hover:shadow-[0_0_30px_rgba(0,242,255,0.4)] transition-all active:scale-95 disabled:opacity-50"
@@ -83,10 +113,18 @@ export default function Login() {
                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>Deploy OTP</span>
+                  <span>{isPasswordMode ? 'Authorize Access' : 'Deploy OTP'}</span>
                   <ArrowRight size={18} />
                 </>
               )}
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => setIsPasswordMode(!isPasswordMode)}
+              className="w-full text-center text-[10px] font-bold text-slate-500 hover:text-[#00f2ff] transition-colors uppercase tracking-widest"
+            >
+              {isPasswordMode ? 'Switch to Magic Link' : 'Use Password Instead'}
             </button>
           </form>
         </div>
