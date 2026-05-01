@@ -13,6 +13,11 @@
     "db:generate": "npm run generate --workspace=@autogrowx/database",
     "db:push": "npm run push --workspace=@autogrowx/database"
   },
+  "dependencies": {
+    "next": "15.1.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
   "devDependencies": {
     "turbo": "^2.0.0"
   }
