@@ -16,6 +16,8 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
   const [priority, setPriority] = useState<Priority>('medium');
   const [category, setCategory] = useState('Tactical');
   const [dueDate, setDueDate] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     if (editingTask) {
@@ -24,12 +26,16 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setPriority(editingTask.priority);
       setCategory(editingTask.category);
       setDueDate(editingTask.dueDate?.split('T')[0] || '');
+      setImageUrl(editingTask.image_url || '');
+      setNotes(editingTask.notes || '');
     } else {
       setTitle('');
       setDescription('');
       setPriority('medium');
       setCategory('Tactical');
       setDueDate('');
+      setImageUrl('');
+      setNotes('');
     }
   }, [editingTask, isOpen]);
 
@@ -43,13 +49,15 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       priority,
       category,
       dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
+      image_url: imageUrl,
+      notes: notes
     });
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 overflow-y-auto">
           {/* Backdrop */}
           <motion.div 
             initial={{ opacity: 0 }}
@@ -65,7 +73,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className="relative w-full max-w-lg glass-panel p-8 rounded-3xl border-cyan-500/20 overflow-hidden"
+            className="relative w-full max-w-2xl glass-panel p-8 rounded-3xl border-cyan-500/20 overflow-hidden my-auto"
           >
             {/* Corner Accent */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 blur-[40px] -z-10" />
@@ -80,7 +88,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
                     {editingTask ? 'EDIT_MISSION' : 'INITIALIZE_MISSION'}
                   </h3>
                   <p className="text-[10px] font-mono font-bold text-cyan-400/60 tracking-widest uppercase mt-1">
-                    Neural Link Active v4.2
+                    Neural Link Active v5.0
                   </p>
                 </div>
               </div>
@@ -93,51 +101,84 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">MISSION TITLE</label>
-                <input 
-                  autoFocus
-                  type="text" 
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="DESIGNATE OBJECTIVE..."
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-sm"
-                  required
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">MISSION TITLE</label>
+                    <input 
+                      autoFocus
+                      type="text" 
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="DESIGNATE OBJECTIVE..."
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-sm"
+                      required
+                    />
+                  </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">TACTICAL DETAILS</label>
-                <textarea 
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="ADD OPERATIONAL PARAMETERS..."
-                  rows={3}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-sm resize-none"
-                />
-              </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">TACTICAL DETAILS</label>
+                    <textarea 
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="ADD OPERATIONAL PARAMETERS..."
+                      rows={2}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-sm resize-none"
+                    />
+                  </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">PRIORITY_LEVEL</label>
-                  <select 
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value as Priority)}
-                    className="w-full bg-[#080808] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-xs uppercase appearance-none cursor-pointer"
-                  >
-                    <option value="low">Low Priority</option>
-                    <option value="medium">Routine Ops</option>
-                    <option value="high">Critical Asset</option>
-                  </select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">PRIORITY_LEVEL</label>
+                      <select 
+                        value={priority}
+                        onChange={(e) => setPriority(e.target.value as Priority)}
+                        className="w-full bg-[#080808] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-[10px] uppercase appearance-none cursor-pointer"
+                      >
+                        <option value="low">Low Priority</option>
+                        <option value="medium">Routine Ops</option>
+                        <option value="high">Critical Asset</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">TARGET_DATE</label>
+                      <input 
+                        type="date" 
+                        value={dueDate}
+                        onChange={(e) => setDueDate(e.target.value)}
+                        className="w-full bg-[#080808] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-[10px] cursor-pointer"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">TARGET_DATE</label>
-                  <input 
-                    type="date" 
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full bg-[#080808] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-xs cursor-pointer"
-                  />
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">VISUAL INTEL (IMAGE URL)</label>
+                    <input 
+                      type="text" 
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="ATTACH IMAGE LINK..."
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-sm"
+                    />
+                    {imageUrl && (
+                      <div className="mt-2 h-20 rounded-lg overflow-hidden border border-white/10 bg-black/40 p-1">
+                        <img src={imageUrl} className="w-full h-full object-cover rounded" alt="Preview" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono font-bold text-slate-500 tracking-widest uppercase">INTELLIGENCE LOGS (NOTES)</label>
+                    <textarea 
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="ENTER FIELD OBSERVATIONS..."
+                      rows={4}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-mono text-sm resize-none"
+                    />
+                  </div>
                 </div>
               </div>
 

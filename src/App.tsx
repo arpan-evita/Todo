@@ -298,27 +298,34 @@ function App() {
                       className={`glass-panel p-4 rounded-xl flex items-center justify-between hover:border-cyan-500/40 transition-all cursor-pointer group ${task.status === 'done' ? 'opacity-50 grayscale-[0.5]' : ''}`}
                       onClick={() => updateTaskStatus(task.id, task.status === 'done' ? 'todo' : 'done')}
                     >
-                      <div className="flex items-center space-x-5">
-                        <div className={`w-6 h-6 border-2 transition-all flex items-center justify-center rounded ${task.status === 'done' ? 'bg-cyan-500 border-cyan-500' : 'border-cyan-500/50 group-hover:border-cyan-400'}`}>
+                      <div className="flex items-center space-x-5 flex-1">
+                        <div className={`w-6 h-6 border-2 transition-all flex items-center justify-center rounded shrink-0 ${task.status === 'done' ? 'bg-cyan-500 border-cyan-500' : 'border-cyan-500/50 group-hover:border-cyan-400'}`}>
                           {task.status === 'done' && <Check className="w-4 h-4 text-black" />}
                         </div>
-                        <div>
-                          <h4 className={`text-white font-semibold transition-all ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</h4>
-                          <p className="text-slate-500 text-[11px] font-medium font-mono">
-                            Tactical • {task.status === 'done' ? `Completed` : 'Due in 2 hours'}
+                        
+                        {task.image_url && (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40 shrink-0 hidden sm:block">
+                            <img src={task.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="Mission Intel" />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`text-white font-semibold truncate transition-all ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</h4>
+                          <p className="text-slate-500 text-[11px] font-medium font-mono truncate">
+                            {task.notes ? `Log: ${task.notes.substring(0, 30)}...` : `Tactical • ${task.status === 'done' ? 'Completed' : 'Due in 2 hours'}`}
                           </p>
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-5">
+                      <div className="flex items-center space-x-5 ml-4">
                         {task.status !== 'done' ? (
-                          <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded tracking-widest ${
+                          <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded tracking-widest shrink-0 ${
                             task.priority === 'high' ? 'text-cyan-400 bg-cyan-400/10' : 'text-slate-400 bg-white/5'
                           }`}>
                             {task.priority.toUpperCase()} PRIORITY
                           </span>
                         ) : (
-                          <span className="text-[10px] font-mono font-bold text-slate-500 tracking-widest">+150 XP</span>
+                          <span className="text-[10px] font-mono font-bold text-slate-500 tracking-widest shrink-0">+150 XP</span>
                         )}
                         <button className="text-slate-500 hover:text-white transition-colors">
                           <MoreVertical className="w-5 h-5" />

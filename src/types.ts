@@ -11,4 +11,6 @@ export interface Task {
   dueDate?: string;
   createdAt: string;
   completedAt?: string;
+  image_url?: string;
+  notes?: string;
 }
