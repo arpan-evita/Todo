@@ -10,13 +10,14 @@ interface TaskModalProps {
   onClose: () => void;
   onSave: (task: any) => void;
   editingTask?: Task | null;
+  modules: string[];
 }
 
-export default function TaskModal({ isOpen, onClose, onSave, editingTask }: TaskModalProps) {
+export default function TaskModal({ isOpen, onClose, onSave, editingTask, modules }: TaskModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
-  const [module, setModule] = useState('SEO');
+  const [module, setModule] = useState(modules[0] || 'General');
   const [dueDate, setDueDate] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [xp, setXp] = useState(150);
@@ -27,7 +28,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setTitle(editingTask.title);
       setDescription(editingTask.description || '');
       setPriority(editingTask.priority);
-      setModule(editingTask.module || 'SEO');
+      setModule(editingTask.module || modules[0] || 'General');
       setDueDate(editingTask.due_date?.split('T')[0] || '');
       setImageUrl(editingTask.image_url || '');
       setXp(editingTask.xp || 150);
@@ -35,12 +36,12 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
       setTitle('');
       setDescription('');
       setPriority('medium');
-      setModule('SEO');
+      setModule(modules[0] || 'General');
       setDueDate('');
       setImageUrl('');
       setXp(150);
     }
-  }, [editingTask, isOpen]);
+  }, [editingTask, isOpen, modules]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -149,10 +150,9 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask }: Task
                     onChange={(e) => setModule(e.target.value)}
                     className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-[#00f2ff]/50 transition-all text-[10px] appearance-none cursor-pointer"
                   >
-                    <option value="SEO">SEO</option>
-                    <option value="Development">Development</option>
-                    <option value="Strategy">Strategy</option>
-                    <option value="Social">Social</option>
+                    {modules.map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="space-y-2">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trophy, Zap, Target, Award, ShieldCheck, Edit3, Upload, Globe, Save } from 'lucide-react';
+import { Trophy, Zap, Target, Award, ShieldCheck, Edit3, Upload, Globe, Save, X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Task } from '../types';
@@ -13,6 +13,7 @@ interface LevelBoardProps {
     full_name: string;
     avatar_url: string;
     social_links: any;
+    custom_modules: string[];
   };
   onUpdate: () => void;
   userId: string;
@@ -36,6 +37,8 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(profile.full_name);
   const [socials, setSocials] = useState(profile.social_links);
+  const [modules, setModules] = useState(profile.custom_modules || []);
+  const [newModule, setNewModule] = useState('');
   const [uploading, setUploading] = useState(false);
 
   const nextLevelXp = 5000;
@@ -78,7 +81,8 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
       .from('profiles')
       .update({ 
         full_name: fullName,
-        social_links: socials
+        social_links: socials,
+        custom_modules: modules
       })
       .eq('id', userId);
 
@@ -86,6 +90,17 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
       onUpdate();
       setIsEditing(false);
     }
+  };
+
+  const addModule = () => {
+    if (newModule.trim() && !modules.includes(newModule.trim())) {
+      setModules([...modules, newModule.trim()]);
+      setNewModule('');
+    }
+  };
+
+  const removeModule = (m: string) => {
+    setModules(modules.filter(mod => mod !== m));
   };
 
   return (
@@ -157,6 +172,36 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
                     onChange={(e) => setSocials({ ...socials, linkedin: e.target.value })}
                     className="w-full bg-[#111] border border-white/10 rounded-xl p-3 text-white text-xs"
                   />
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <label className="text-[10px] font-bold text-slate-500 tracking-widest uppercase">OPERATIONAL MODULES</label>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {modules.map((m) => (
+                    <div key={m} className="px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-lg flex items-center space-x-2 group/mod">
+                      <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">{m}</span>
+                      <button onClick={() => removeModule(m)} className="text-cyan-500/40 hover:text-red-400 transition-colors">
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex space-x-2">
+                  <input 
+                    type="text" 
+                    value={newModule}
+                    onChange={(e) => setNewModule(e.target.value)}
+                    placeholder="New Module Name..."
+                    className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-white text-xs"
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addModule())}
+                  />
+                  <button 
+                    onClick={(e) => { e.preventDefault(); addModule(); }}
+                    className="px-4 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all"
+                  >
+                    <Target size={14} />
+                  </button>
                 </div>
               </div>
 

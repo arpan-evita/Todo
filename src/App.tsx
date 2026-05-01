@@ -42,11 +42,13 @@ function App() {
     avatar_url: string;
     social_links: any;
     mode: string;
+    custom_modules: string[];
   }>({
     full_name: '',
     avatar_url: '',
     social_links: {},
-    mode: 'Builder'
+    mode: 'Builder',
+    custom_modules: ['General', 'Strategy', 'Focus']
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -89,7 +91,8 @@ function App() {
         full_name: data.full_name || '',
         avatar_url: data.avatar_url || '',
         social_links: data.social_links || {},
-        mode: data.mode || 'Builder'
+        mode: data.mode || 'Builder',
+        custom_modules: data.custom_modules || ['General', 'Strategy', 'Focus']
       });
     }
   };
