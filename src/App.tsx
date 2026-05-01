@@ -167,32 +167,34 @@ function App() {
       <div className="scroll-area">
         {activeTab === 'board' && (
           <>
-            <div className="glass-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <span className="label-caps" style={{ color: '#00f2ff' }}>PILOT LEVEL</span>
-                <span className="label-caps" style={{ color: '#7000ff' }}>NEXT RANK</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '48px', fontWeight: 900 }}>{level}</span>
-                <span style={{ fontSize: '24px', fontWeight: 700, color: '#7000ff' }}>CYBER_KNIGHT</span>
-              </div>
-              <div style={{ marginTop: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#666', marginBottom: '4px' }}>
-                  <span>{xp % 15000} XP</span>
-                  <span>15,000 XP</span>
+            <div className="dashboard-grid">
+              <div className="glass-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <span className="label-caps" style={{ color: '#00f2ff' }}>PILOT LEVEL</span>
+                  <span className="label-caps" style={{ color: '#7000ff' }}>NEXT RANK</span>
                 </div>
-                <div style={{ width: '100%', height: '4px', background: '#1a1a1a', borderRadius: '4px' }}>
-                  <div style={{ width: `${xpProgress || 5}%`, height: '100%', background: 'linear-gradient(90deg, #00f2ff, #7000ff)', borderRadius: '4px' }}></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '48px', fontWeight: 900 }}>{level}</span>
+                  <span style={{ fontSize: '24px', fontWeight: 700, color: '#7000ff' }}>CYBER_KNIGHT</span>
+                </div>
+                <div style={{ marginTop: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#666', marginBottom: '4px' }}>
+                    <span>{xp % 15000} XP</span>
+                    <span>15,000 XP</span>
+                  </div>
+                  <div style={{ width: '100%', height: '4px', background: '#1a1a1a', borderRadius: '4px' }}>
+                    <div style={{ width: `${xpProgress || 5}%`, height: '100%', background: 'linear-gradient(90deg, #00f2ff, #7000ff)', borderRadius: '4px' }}></div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="glass-card" style={{ textAlign: 'center' }}>
-              <span className="label-caps" style={{ color: '#ff3b30', marginBottom: '8px', display: 'block' }}>ACTIVE STREAK</span>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-                <Flame size={32} style={{ color: '#ff3b30' }} fill="#ff3b30" />
-                <span style={{ fontSize: '48px', fontWeight: 900 }}>{streak}</span>
-                <span style={{ fontSize: '20px', fontWeight: 700, color: '#666', alignSelf: 'flex-end', marginBottom: '8px' }}>DAYS</span>
+              <div className="glass-card" style={{ textAlign: 'center' }}>
+                <span className="label-caps" style={{ color: '#ff3b30', marginBottom: '8px', display: 'block' }}>ACTIVE STREAK</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+                  <Flame size={32} style={{ color: '#ff3b30' }} fill="#ff3b30" />
+                  <span style={{ fontSize: '48px', fontWeight: 900 }}>{streak}</span>
+                  <span style={{ fontSize: '20px', fontWeight: 700, color: '#666', alignSelf: 'flex-end', marginBottom: '8px' }}>DAYS</span>
+                </div>
               </div>
             </div>
 

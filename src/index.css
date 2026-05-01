@@ -151,6 +151,73 @@ html, body, #root {
   z-index: 2001;
 }
 
+/* DESKTOP COMMANDER OPTIMIZATIONS */
+@media (min-width: 1024px) {
+  .app-viewport {
+    background: radial-gradient(circle at 50% 50%, #151515, #000) !important;
+  }
+
+  .app-header {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    border-bottom: none;
+    padding: 30px 0;
+    height: 100px;
+  }
+
+  .scroll-area {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding-top: 20px;
+    align-content: start;
+  }
+
+  /* Force certain items to span full width */
+  .scroll-area > div:nth-child(3), 
+  .scroll-area > h2,
+  .scroll-area > div[style*="borderBottom"],
+  .scroll-area > .glass-card:last-child {
+    grid-column: span 2;
+  }
+
+  .glass-card {
+    height: fit-content;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .bottom-nav {
+    width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    background: rgba(10, 10, 10, 0.8);
+  }
+
+  .login-bg {
+    background: radial-gradient(circle at 50% 50%, #1a1a1a, #000);
+  }
+}
+
+/* Force consistency for specific dashboard elements */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+@media (max-width: 1023px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* LOGIN SPECIFIC */
 .login-bg {
   background: radial-gradient(circle at 50% 0%, #111, #000);
