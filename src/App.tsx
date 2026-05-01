@@ -76,9 +76,43 @@ function App() {
     }
   };
 
+  const calculateStreak = (allTasks: Task[]) => {
+    const completedDates = allTasks
+      .filter(t => t.status === 'done' && t.completed_at)
+      .map(t => new Date(t.completed_at!).toDateString());
+    
+    const uniqueDates = Array.from(new Set(completedDates)).sort((a, b) => 
+      new Date(b).getTime() - new Date(a).getTime()
+    );
+
+    if (uniqueDates.length === 0) return 0;
+
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+    if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 0;
+
+    let currentStreak = 0;
+    let checkDate = new Date(uniqueDates[0]);
+
+    for (let i = 0; i < uniqueDates.length; i++) {
+      const dateStr = new Date(uniqueDates[i]).toDateString();
+      if (dateStr === checkDate.toDateString()) {
+        currentStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return currentStreak;
+  };
+
   const fetchTasks = async () => {
     const { data, error } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
-    if (!error && data) setTasks(data);
+    if (!error && data) {
+      setTasks(data);
+      setStreak(calculateStreak(data));
+    }
   };
 
   const handleSaveTask = async (taskData: Partial<Task>) => {
@@ -425,9 +459,9 @@ function App() {
             </h3>
             <div className="space-y-5">
               {[
-                { color: 'bg-cyan-400 shadow-[0_0_8px_rgba(0,242,255,0.6)]', text: <>Global mission completion up <span className="text-cyan-400 font-bold">12%</span> in your sector.</> },
-                { color: 'bg-purple-500 shadow-[0_0_8px_rgba(112,0,255,0.6)]', text: <>Operator <span className="text-purple-400 font-bold">@X_Zero</span> beat your record in tactical refactoring.</> },
-                { color: 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]', text: <>System maintenance scheduled in 4 cycles. Backup data.</> },
+                { color: 'bg-cyan-400 shadow-[0_0_8px_rgba(0,242,255,0.6)]', text: <>Operational efficiency at <span className="text-cyan-400 font-bold">{tasks.length > 0 ? Math.round((tasks.filter(t => t.status === 'done').length / tasks.length) * 100) : 0}%</span> in your sector.</> },
+                { color: 'bg-purple-500 shadow-[0_0_8px_rgba(112,0,255,0.6)]', text: <><span className="text-purple-400 font-bold">{tasks.filter(t => t.status === 'in-progress').length}</span> active mandates currently in tactical execution.</> },
+                { color: 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]', text: <>Bounty pool: <span className="text-yellow-400 font-bold">{tasks.filter(t => t.status !== 'done').reduce((acc, t) => acc + (t.xp || 150), 0)} XP</span> available for claim.</> },
               ].map((intel, i) => (
                 <div key={i} className="flex items-start space-x-4">
                   <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${intel.color}`} />
@@ -441,23 +475,35 @@ function App() {
           <section className="glass-panel p-5 rounded-xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-mono text-[11px] font-bold text-white tracking-widest uppercase">MISSION LOG</h3>
-              <span className="text-[9px] text-slate-500 font-mono font-bold tracking-widest">OCTOBER 2023</span>
+              <span className="text-[9px] text-slate-500 font-mono font-bold tracking-widest">
+                {new Date().toLocaleString('default', { month: 'long' }).toUpperCase()} {new Date().getFullYear()}
+              </span>
             </div>
             <div className="grid grid-cols-7 gap-1 text-center">
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => (
                 <div key={d} className="text-[9px] font-mono font-bold text-slate-600 mb-2">{d}</div>
               ))}
-              {[28, 29, 30, 1, 2, 3, 4, 5, 6, 7, 8].map((day, i) => {
-                const isCurrentMonth = i >= 3;
-                const isToday = day === 3 && i === 5;
+              {Array.from({ length: 35 }).map((_, i) => {
+                const day = i - 3; // Simplified calendar view
+                if (day < 1 || day > 31) return <div key={i} className="aspect-square" />;
+                
+                const hasTask = tasks.some(t => 
+                  t.status === 'done' && 
+                  t.completed_at && 
+                  new Date(t.completed_at).getDate() === day &&
+                  new Date(t.completed_at).getMonth() === new Date().getMonth()
+                );
+
+                const isToday = day === new Date().getDate();
+
                 return (
                   <div 
                     key={i} 
-                    className={`p-2 text-[10px] transition-all duration-300 rounded cursor-pointer font-bold
-                      ${isToday ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50' : ''}
-                      ${isCurrentMonth && !isToday ? 'text-slate-400 hover:bg-white/5' : ''}
-                      ${!isCurrentMonth ? 'text-slate-800 pointer-events-none' : ''}
-                    `}
+                    className={`aspect-square flex items-center justify-center text-[10px] font-mono font-bold rounded-lg transition-all ${
+                      hasTask 
+                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-[0_0_10px_rgba(0,242,255,0.1)]' 
+                      : 'text-slate-700 hover:bg-white/5'
+                    } ${isToday ? 'border-b-2 border-cyan-400' : ''}`}
                   >
                     {day}
                   </div>
