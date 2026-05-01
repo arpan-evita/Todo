@@ -25,6 +25,9 @@ model User {
   xpLogs          XPLog[]
   achievements    UserAchievement[]
   streakLogs      StreakLog[]
+  aiInsights      AIInsight[]
+  notifications   Notification[]
+  activityLogs    UserActivityLog[]
 }
 
 model Task {
@@ -51,7 +54,7 @@ model XPLog {
   reason    String
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Achievement {
@@ -85,3 +88,36 @@ model StreakLog {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model AIInsight {
+  id           String   @id @default(cuid())
+  userId       String
+  text         String
+  type         String   // warning, opportunity, performance
+  isRead       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id           String   @id @default(cuid())
+  userId       String
+  message      String
+  type         String   // urgency, opportunity, revenue
+  readStatus   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserActivityLog {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String   // completion, login, mode_change, missed_task
+  metadata     Json?    // Store task_id, previous_mode, etc.
+  timestamp    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+

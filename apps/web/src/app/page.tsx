@@ -28,12 +28,17 @@ import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAnd
 import { checkNewAchievements } from '../lib/achievements';
 import type { Task, Status } from '../lib/types';
 import { initNotifications, sendNotification } from '../lib/notifications';
+import { logActivity } from '../lib/activity';
 
 import TaskModal from '../components/TaskModal';
 import Leaderboard from '../components/Leaderboard';
 import Reports from '../components/Reports';
 import LevelBoard from '../components/LevelBoard';
 import Login from '../components/Login';
+import AIInsights from '../components/AIInsights';
+import AICoach from '../components/AICoach';
+
+
 
 const PILOT_IMG = "https://lh3.googleusercontent.com/aida-public/AB6AXuAh40g38_asydALJucbCa8FKAn_yk3LmmWOCj_t4mEtMW0xziM3cocNSjd-naohafI7akNLwzINnSboGd8BdzW_us1r3PoOwfBFcjMshG_67MrEPOUYCpZyagfMkJ6qwx45AKwHiIZGEQFPgLCrvzHpl6HhOdnfu14wjfgyFtXT7cuXAhETVHPfj-2LXxyE3HFrFyAwNg6rjE6LMETh4TSO6UEXsNwSIIUfCFKeP6_SPJD_1u8knrUFj021u-wo2Ij12j1wpT0JXS2a";
 
@@ -63,8 +68,10 @@ export default function Dashboard() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
+      if (session) logActivity(session.user.id, 'login', { user_agent: navigator.userAgent });
       setLoading(false);
     };
+
     checkSession();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
     return () => subscription.unsubscribe();
@@ -130,12 +137,14 @@ export default function Dashboard() {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         grantXp(finalXp);
         sendNotification('MISSION ACCOMPLISHED', `Mandate "${task.title}" secured. +${finalXp} XP acquired.`);
+        logActivity(session.user.id, 'task_completed', { task_id: task.id, title: task.title, xp_earned: finalXp });
       } else if (oldStatus === 'done' && newStatus !== 'done') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         grantXp(-finalXp);
       }
       fetchTasks();
     }
+
 
   };
 
@@ -165,9 +174,11 @@ export default function Dashboard() {
     if (editingTask) {
       await supabase.from('tasks').update(taskData).eq('id', editingTask.id);
     } else {
-      await supabase.from('tasks').insert([{ ...taskData, user_id: session.user.id }]);
+      const { data } = await supabase.from('tasks').insert([{ ...taskData, user_id: session.user.id }]).select().single();
+      if (data) logActivity(session.user.id, 'task_created', { task_id: data.id, title: data.title });
     }
     fetchTasks();
+
     setIsModalOpen(false);
     setEditingTask(null);
   };
@@ -229,7 +240,9 @@ export default function Dashboard() {
           <div className="col-span-12 lg:col-span-8 space-y-8">
             {activeTab === 'board' && (
               <>
+                <AIInsights userId={session.user.id} />
                 {/* Level Card */}
+
                 <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel-active p-8 rounded-2xl relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-4"><span className="px-3 py-1 glass-panel rounded-full text-[10px] font-bold text-[#00f2ff] tracking-widest uppercase">LEVEL {level}</span></div>
                   <div className="flex justify-between items-end mb-8 gap-4">
@@ -346,8 +359,10 @@ export default function Dashboard() {
                           key={mode.id}
                           onClick={async () => {
                             await supabase.from('profiles').update({ mode: mode.id }).eq('id', session.user.id);
+                            logActivity(session.user.id, 'mode_change', { from: profile.mode, to: mode.id });
                             initialize();
                           }}
+
                           className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${profile.mode === mode.id ? 'border-[#00f2ff] bg-[#00f2ff]/5' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
                         >
                           <mode.icon className={`w-8 h-8 mb-4 ${profile.mode === mode.id ? 'text-[#00f2ff]' : 'text-slate-500'}`} />
@@ -423,6 +438,10 @@ export default function Dashboard() {
           ))}
         </AnimatePresence>
       </div>
+
+      <AICoach userId={session.user.id} />
+
     </div>
   );
 }
+
