@@ -34,9 +34,19 @@ function App() {
   useEffect(() => {
     // Initial session check
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setLoading(false);
+      try {
+        const timeout = setTimeout(() => {
+          setLoading(false); // Force stop loading if it takes too long
+        }, 5000);
+
+        const { data: { session } } = await supabase.auth.getSession();
+        clearTimeout(timeout);
+        setSession(session);
+        setLoading(false);
+      } catch (err) {
+        console.error("Auth Error:", err);
+        setLoading(false);
+      }
     };
 
     checkSession();
