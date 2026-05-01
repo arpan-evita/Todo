@@ -29,15 +29,25 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
       .from('profiles')
       .select('id, full_name, xp, level, avatar_url')
       .order('xp', { ascending: false })
-      .limit(10);
+      .limit(50);
+
     
     if (data) setLeaders(data);
     setLoading(false);
   };
 
-  const userRank = leaders.findIndex(l => l.id === (currentUser as any).id) + 1;
-  const displayRank = userRank > 0 ? `#${userRank}` : '#--';
-  const displayPercentile = userRank === 1 ? 'Top 1%' : userRank > 0 ? `Top ${Math.round((userRank / Math.max(leaders.length, 1)) * 100)}%` : 'Top 1%';
+  // Calculate accurate rankings handling ties
+  const rankedLeaders = leaders.map((leader, index) => {
+    const rank = index > 0 && leaders[index - 1].xp === leader.xp 
+      ? leaders[index - 1].rank 
+      : index + 1;
+    return { ...leader, rank };
+  });
+
+  const currentUserData = rankedLeaders.find(l => l.id === (currentUser as any).id);
+  const displayRank = currentUserData ? `#${currentUserData.rank}` : '#--';
+  const displayPercentile = currentUserData ? `Top ${Math.round((currentUserData.rank / Math.max(leaders.length, 1)) * 100)}%` : 'Top 1%';
+
 
 
   return (
@@ -57,22 +67,22 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
             </div>
           )}
           
-          {leaders.map((leader, index) => (
+          {rankedLeaders.map((leader, index) => (
             <motion.div 
               key={leader.id || index}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`glass-panel p-5 rounded-2xl flex items-center justify-between group hover:border-[#00f2ff]/30 transition-all ${index < 3 ? 'border-l-4 border-l-[#00f2ff]' : ''} ${leader.id === (currentUser as any).id ? 'bg-[#00f2ff]/5 border-[#00f2ff]/30' : ''}`}
+              className={`glass-panel p-5 rounded-2xl flex items-center justify-between group hover:border-[#00f2ff]/30 transition-all ${leader.rank <= 3 ? 'border-l-4 border-l-[#00f2ff]' : ''} ${leader.id === (currentUser as any).id ? 'bg-[#00f2ff]/5 border-[#00f2ff]/30' : ''}`}
             >
               <div className="flex items-center space-x-6">
-                <div className="w-8 text-center text-xl font-black italic text-slate-700 group-hover:text-[#00f2ff] transition-colors">{index + 1}</div>
+                <div className="w-8 text-center text-xl font-black italic text-slate-700 group-hover:text-[#00f2ff] transition-colors">{leader.rank}</div>
                 <div className="w-12 h-12 rounded-full border border-white/10 overflow-hidden shrink-0">
                    <img src={leader.avatar_url || 'https://lh3.googleusercontent.com/a/default-user'} className="w-full h-full object-cover" alt="Operative" />
                 </div>
                 <div>
                    <h4 className="font-bold text-white uppercase tracking-tight">
-                     {leader.full_name || 'Anonymous Operative'}
+                     {leader.full_name || `OPERATIVE-${leader.id?.slice(0, 4).toUpperCase()}`}
                      {leader.id === (currentUser as any).id && <span className="ml-2 text-[8px] bg-[#00f2ff] text-black px-1.5 py-0.5 rounded">YOU</span>}
                    </h4>
                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Level {calculateLevel(leader.xp)} • {leader.xp.toLocaleString()} XP</p>
@@ -80,9 +90,10 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
               </div>
 
               <div className="flex items-center space-x-4">
-                 {index === 0 && <Trophy size={20} className="text-yellow-400" />}
-                 {index === 1 && <Medal size={20} className="text-slate-400" />}
-                 {index === 2 && <Medal size={20} className="text-orange-600" />}
+                 {leader.rank === 1 && <Trophy size={20} className="text-yellow-400" />}
+                 {leader.rank === 2 && <Medal size={20} className="text-slate-400" />}
+                 {leader.rank === 3 && <Medal size={20} className="text-orange-600" />}
+
                  <div className="text-right">
                     <p className="text-[10px] font-bold text-[#00f2ff] uppercase tracking-widest leading-none mb-1">Status</p>
                     <p className="text-xs font-black uppercase text-white">Operational</p>
