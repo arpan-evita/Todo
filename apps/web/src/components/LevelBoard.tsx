@@ -31,14 +31,48 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
       setUploading(true);
       if (!e.target.files?.[0]) return;
       const file = e.target.files[0];
-      const filePath = `avatars/${userId}-${Math.random()}.${file.name.split('.').pop()}`;
+      
+      // Basic validation
+      if (file.size > 2 * 1024 * 1024) {
+        alert('MISSION FILE TOO LARGE: Maximum size is 2MB.');
+        return;
+      }
 
-      await supabase.storage.from('profiles').upload(filePath, file);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('profiles')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        if (uploadError.message.includes('not found')) {
+          alert('STORAGE ERROR: The "profiles" bucket was not found in your Supabase storage. Please create a public bucket named "profiles" in your Supabase dashboard.');
+        } else {
+          alert(`UPLOAD FAILED: ${uploadError.message}`);
+        }
+        return;
+      }
+
       const { data: { publicUrl } } = supabase.storage.from('profiles').getPublicUrl(filePath);
-      await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', userId);
-      onUpdate();
-    } catch (err) { console.error(err); } finally { setUploading(false); }
+      
+      const { error: updateError } = await supabase.from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', userId);
+
+      if (updateError) {
+        alert(`PROFILE UPDATE FAILED: ${updateError.message}`);
+      } else {
+        onUpdate();
+      }
+    } catch (err: any) { 
+      alert(`SYSTEM ERROR: ${err.message}`);
+    } finally { 
+      setUploading(false); 
+    }
   };
+
 
   const saveProfile = async () => {
     const { error } = await supabase.from('profiles').update({ full_name: fullName, social_links: socials }).eq('id', userId);
