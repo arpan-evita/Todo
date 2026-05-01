@@ -331,16 +331,16 @@ function App() {
                     <div key={task.id} className="group relative p-6 bg-[#080808] border border-white/5 rounded-2xl hover:border-cyan-500/30 transition-all flex items-center">
                       <div className="mr-6">
                         <div 
-                          onClick={() => updateTaskStatus(task.id, task.status === 'completed' ? 'active' : 'completed')}
+                          onClick={() => updateTaskStatus(task.id, task.status === 'done' ? 'todo' : 'done')}
                           className={`w-6 h-6 rounded border-2 transition-all cursor-pointer flex items-center justify-center ${
-                            task.status === 'completed' ? 'bg-cyan-400 border-cyan-400' : 'border-white/10 hover:border-cyan-400/50'
+                            task.status === 'done' ? 'bg-cyan-400 border-cyan-400' : 'border-white/10 hover:border-cyan-400/50'
                           }`}
                         >
-                          {task.status === 'completed' && <span className="material-symbols-outlined text-black text-sm font-bold">check</span>}
+                          {task.status === 'done' && <span className="material-symbols-outlined text-black text-sm font-bold">check</span>}
                         </div>
                       </div>
                       <div className="flex-1">
-                        <h4 className={`text-sm font-bold tracking-tight mb-1 ${task.status === 'completed' ? 'text-slate-500 line-through' : 'text-white'}`}>
+                        <h4 className={`text-sm font-bold tracking-tight mb-1 ${task.status === 'done' ? 'text-slate-500 line-through' : 'text-white'}`}>
                           {task.title}
                         </h4>
                         <p className="text-[10px] text-slate-500 font-label-caps uppercase tracking-widest">Tactical • Due in 2 hours</p>
