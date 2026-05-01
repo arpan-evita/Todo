@@ -22,9 +22,9 @@ export interface UserProfile {
   id: string;
   full_name: string;
   avatar_url: string;
-  level: Int;
-  xp: Int;
-  streak: Int;
+  level: number;
+  xp: number;
+  streak: number;
   mode: string;
   custom_modules: string[];
   social_links: any;
