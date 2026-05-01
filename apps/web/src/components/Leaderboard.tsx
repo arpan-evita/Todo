@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
-import { Trophy, Medal, Target } from 'lucide-react';
+import { Trophy, Medal, Target, User as UserIcon } from 'lucide-react';
+import { calculateLevel } from '../lib/gameLogic';
 
 interface LeaderboardProps {
   currentUser: {
@@ -23,15 +24,21 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
   }, []);
 
   const fetchLeaders = async () => {
+    setLoading(true);
     const { data } = await supabase
       .from('profiles')
-      .select('full_name, xp, level, avatar_url')
+      .select('id, full_name, xp, level, avatar_url')
       .order('xp', { ascending: false })
       .limit(10);
     
     if (data) setLeaders(data);
     setLoading(false);
   };
+
+  const userRank = leaders.findIndex(l => l.id === (currentUser as any).id) + 1;
+  const displayRank = userRank > 0 ? `#${userRank}` : '#--';
+  const displayPercentile = userRank === 1 ? 'Top 1%' : userRank > 0 ? `Top ${Math.round((userRank / Math.max(leaders.length, 1)) * 100)}%` : 'Top 1%';
+
 
   return (
     <div className="space-y-8 pb-20">
@@ -43,13 +50,20 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Top 3 Podium */}
         <div className="lg:col-span-2 space-y-4">
+          {leaders.length === 0 && !loading && (
+            <div className="glass-panel p-10 rounded-2xl text-center">
+              <UserIcon className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">No other operatives detected in this sector.</p>
+            </div>
+          )}
+          
           {leaders.map((leader, index) => (
             <motion.div 
-              key={index}
+              key={leader.id || index}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`glass-panel p-5 rounded-2xl flex items-center justify-between group hover:border-[#00f2ff]/30 transition-all ${index < 3 ? 'border-l-4 border-l-[#00f2ff]' : ''}`}
+              className={`glass-panel p-5 rounded-2xl flex items-center justify-between group hover:border-[#00f2ff]/30 transition-all ${index < 3 ? 'border-l-4 border-l-[#00f2ff]' : ''} ${leader.id === (currentUser as any).id ? 'bg-[#00f2ff]/5 border-[#00f2ff]/30' : ''}`}
             >
               <div className="flex items-center space-x-6">
                 <div className="w-8 text-center text-xl font-black italic text-slate-700 group-hover:text-[#00f2ff] transition-colors">{index + 1}</div>
@@ -57,10 +71,14 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
                    <img src={leader.avatar_url || 'https://lh3.googleusercontent.com/a/default-user'} className="w-full h-full object-cover" alt="Operative" />
                 </div>
                 <div>
-                   <h4 className="font-bold text-white uppercase tracking-tight">{leader.full_name || 'Anonymous Operative'}</h4>
-                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Level {leader.level} • {leader.xp.toLocaleString()} XP</p>
+                   <h4 className="font-bold text-white uppercase tracking-tight">
+                     {leader.full_name || 'Anonymous Operative'}
+                     {leader.id === (currentUser as any).id && <span className="ml-2 text-[8px] bg-[#00f2ff] text-black px-1.5 py-0.5 rounded">YOU</span>}
+                   </h4>
+                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Level {calculateLevel(leader.xp)} • {leader.xp.toLocaleString()} XP</p>
                 </div>
               </div>
+
               <div className="flex items-center space-x-4">
                  {index === 0 && <Trophy size={20} className="text-yellow-400" />}
                  {index === 1 && <Medal size={20} className="text-slate-400" />}
@@ -83,11 +101,11 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
              <div className="w-full grid grid-cols-2 gap-4">
                 <div className="bg-white/5 p-4 rounded-xl">
                    <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">Global Rank</p>
-                   <p className="text-xl font-black">#--</p>
+                   <p className="text-xl font-black">{displayRank}</p>
                 </div>
                 <div className="bg-white/5 p-4 rounded-xl">
                    <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">Percentile</p>
-                   <p className="text-xl font-black">Top 1%</p>
+                   <p className="text-xl font-black">{displayPercentile}</p>
                 </div>
              </div>
           </motion.div>
