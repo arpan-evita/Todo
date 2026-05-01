@@ -596,7 +596,13 @@ function App() {
         </div>
       </motion.div>
 
-      <TaskModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTask(null); }} onSave={handleSaveTask} editingTask={editingTask} />
+      <TaskModal 
+        isOpen={isModalOpen} 
+        onClose={() => { setIsModalOpen(false); setEditingTask(null); }} 
+        onSave={handleSaveTask} 
+        editingTask={editingTask} 
+        modules={profile.custom_modules}
+      />
 
       {/* Glow effects */}
       <div className="fixed top-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/5 blur-[120px] rounded-full pointer-events-none -z-10" />
