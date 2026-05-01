@@ -1,231 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
 @theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Grotesk", ui-monospace, SFMono-Regular, monospace;
+
   --color-primary-container: #00f2ff;
   --color-secondary-container: #7000ff;
+  --color-surface: #131313;
   --color-background: #050505;
-  --font-display-xl: "Inter", sans-serif;
-  --font-label-caps: "Space Grotesk", sans-serif;
+  
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
 }
 
-/* IRONCLAD CORE RESET */
-* {
+@layer base {
+  * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
+  }
 
-html, body, #root {
-    width: 100vw;
-    height: 100vh;
-    background: #000000;
-    color: #ffffff;
-    font-family: 'Inter', sans-serif;
-    overflow: hidden;
-}
-
-/* SUPREME COMMANDER: IRONCLAD LAYOUT (Manual CSS) */
-.supreme-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-
-.top-strat-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 64px;
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(40px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    z-index: 1000;
-}
-
-.side-mission-rail {
-    position: fixed;
-    left: 0;
-    top: 64px;
-    bottom: 0;
-    width: 80px;
-    background: rgba(8, 8, 8, 0.95);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-    padding: 32px 0;
-    z-index: 900;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-}
-
-.side-mission-rail:hover {
-    width: 240px;
-}
-
-.main-mission-stage {
-    flex: 1;
-    margin-top: 64px;
-    margin-left: 80px;
-    padding: 40px;
-    overflow-y: auto;
-    background: radial-gradient(circle at top right, #0a0a15, #000000);
-}
-
-/* IRONCLAD GRID SYSTEM */
-.iron-grid-12 {
-    display: grid !important;
-    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
-    gap: 32px !important;
-}
-
-@media (min-width: 1024px) {
-    .iron-grid-12 {
-        grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
-    }
-    .iron-col-8 {
-        grid-column: span 8 / span 8 !important;
-    }
-    .iron-col-4 {
-        grid-column: span 4 / span 4 !important;
-    }
-}
-
-/* FILAMENT MODULES (Ironclad) */
-.filament-module {
-    background: #050505 !important;
-    border: 1px solid rgba(0, 242, 255, 0.1) !important;
-    border-radius: 24px !important;
-    padding: 32px !important;
-    transition: all 0.3s ease;
-}
-
-.filament-module:hover {
-    border-color: rgba(0, 242, 255, 0.3) !important;
-    box-shadow: 0 0 30px rgba(0, 242, 255, 0.05);
-}
-
-.tactical-image-frame {
-    border-radius: 24px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    height: 240px;
-    width: 100%;
-}
-
-.tactical-image-frame img {
+  body {
+    background-color: var(--color-background);
+    color: #e5e2e1;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    selection-background-color: var(--color-primary-container);
+    selection-color: black;
+  }
+  
+  html, body, #root {
     width: 100%;
     height: 100%;
-    object-cover: cover;
-    opacity: 0.8;
-    transition: opacity 0.3s ease;
+  }
 }
 
-.tactical-image-frame:hover img {
-    opacity: 1;
-}
-
-/* TYPOGRAPHY ANCHORS */
-.daily-command-header {
-    font-size: 28px !important;
-    font-weight: 900 !important;
-    font-style: italic !important;
-    text-transform: uppercase !important;
-    letter-spacing: -1px !important;
-}
-
-.label-caps-supreme {
-    font-family: 'Space Grotesk', sans-serif !important;
-    font-size: 10px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 2px !important;
-}
-
-/* LOGIN DESIGN SYSTEM (Ironclad) */
-.login-bg {
-    background: radial-gradient(circle at 50% 0%, #1a1a2e, #000000);
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.login-card-supreme {
-    background: rgba(10, 10, 10, 0.8);
+@layer components {
+  .glass-panel {
     backdrop-filter: blur(40px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 64px;
-    border-radius: 32px;
-    width: 100%;
-    max-width: 480px;
-    text-align: center;
-}
-
-.login-input-group {
-    position: relative;
-    margin-bottom: 24px;
-    width: 100%;
-}
-
-.login-input-supreme {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 16px !important;
-    padding: 18px 20px 18px 56px !important;
-    color: #fff !important;
-    font-size: 14px !important;
-    outline: none !important;
-}
-
-.login-btn-supreme {
-    width: 100%;
-    padding: 20px;
-    background: #00f2ff;
-    border: none;
-    border-radius: 16px;
-    color: #000;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    cursor: pointer;
-    box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
-}
-
-/* UTILITIES */
-.material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    font-size: 24px;
-}
-.fill-1 { font-variation-settings: 'FILL' 1 !important; }
-
-.status-dock-supreme {
-    position: fixed;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(10, 10, 10, 0.6);
-    backdrop-filter: blur(40px);
+    background: rgba(15, 15, 20, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 100px;
-    padding: 12px 32px;
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    z-index: 2000;
+  }
+  
+  .glass-panel-active {
+    backdrop-filter: blur(40px);
+    background-color: rgba(15, 15, 20, 0.8);
+    border: 1px solid transparent;
+    position: relative;
+    background-image: linear-gradient(rgba(15, 15, 20, 0.8), rgba(15, 15, 20, 0.8)), linear-gradient(to right, #00f2ff, #7000ff);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .cyber-glow-inner {
+    box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.1);
+  }
+
+  .xp-bar-glow {
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
+  }
 }
 
-@media (max-width: 1024px) {
-    .main-mission-stage { margin-left: 0; margin-bottom: 80px; padding: 24px; }
-    .side-mission-rail { display: none !important; }
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 242, 255, 0.3);
 }
