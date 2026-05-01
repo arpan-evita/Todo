@@ -151,6 +151,47 @@ function App() {
 
   return (
     <div className="app-viewport">
+      {/* DESKTOP SIDEBAR */}
+      <aside className="sidebar-desktop">
+        <div style={{ padding: '0 16px', marginBottom: '40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+            <div style={{ width: '50px', height: '50px', borderRadius: '50%', border: '2px solid #00f2ff', overflow: 'hidden', flexShrink: 0 }}>
+              <img src={PILOT_IMG} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div>
+              <h1 style={{ fontSize: '16px', fontWeight: 900, fontStyle: 'italic', color: '#fff', letterSpacing: '1px' }}>ARPAN-TODO</h1>
+              <p style={{ fontSize: '10px', color: '#00f2ff', fontWeight: 'bold', opacity: 0.6 }}>PILOT_ID: {session.user.email?.split('@')[0].toUpperCase()}</p>
+            </div>
+          </div>
+
+          <div className="glass-card" style={{ padding: '16px', marginBottom: '40px', border: '1px solid rgba(0,242,255,0.2)' }}>
+             <p className="label-caps" style={{ color: '#00f2ff', fontSize: '9px', marginBottom: '8px' }}>CORE STATUS</p>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '24px', fontWeight: 900 }}>LVL {level}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                   <Flame size={14} style={{ color: '#ff3b30' }} fill="#ff3b30" />
+                   <span style={{ fontWeight: 'bold' }}>{streak}</span>
+                </div>
+             </div>
+          </div>
+        </div>
+
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+          <button className={`sidebar-item ${activeTab === 'board' ? 'active' : ''}`} onClick={() => setActiveTab('board')}><LayoutDashboard size={20} /> Missions</button>
+          <button className={`sidebar-item ${activeTab === 'levels' ? 'active' : ''}`} onClick={() => setActiveTab('levels')}><Zap size={20} /> Rankings</button>
+          <button className={`sidebar-item ${activeTab === 'reports' ? 'active' : ''}`} onClick={() => setActiveTab('reports')}><BarChart3 size={20} /> Intel</button>
+          <button className={`sidebar-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}><User size={20} /> Profile</button>
+        </nav>
+
+        <button 
+          onClick={() => supabase.auth.signOut()} 
+          className="sidebar-item" 
+          style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)', borderRadius: 0, padding: '24px 16px' }}
+        >
+          <Flame size={20} style={{ color: '#ff3b30' }} /> LOGOUT_PILOT
+        </button>
+      </aside>
+
       <header className="app-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #00f2ff', overflow: 'hidden' }}>

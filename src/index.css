@@ -155,26 +155,41 @@ html, body, #root {
 @media (min-width: 1024px) {
   .app-viewport {
     background: radial-gradient(circle at 50% 50%, #151515, #000) !important;
+    display: grid;
+    grid-template-columns: 280px 1fr; /* SIDEBAR | CONTENT */
+    grid-template-rows: 1fr;
+    height: 100vh;
+    width: 100vw;
   }
 
   .app-header {
-    max-width: 1100px;
-    margin: 0 auto;
-    width: 100%;
-    border-bottom: none;
-    padding: 30px 0;
-    height: 100px;
+    display: none; /* Hide mobile header on desktop */
+  }
+
+  .sidebar-desktop {
+    display: flex !important;
+    flex-direction: column;
+    background: rgba(10, 10, 10, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 40px 24px;
+    height: 100%;
+    backdrop-filter: blur(50px);
   }
 
   .scroll-area {
-    max-width: 1100px;
-    margin: 0 auto;
     width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 60px 40px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
-    padding-top: 20px;
     align-content: start;
+    overflow-y: auto;
+  }
+
+  .bottom-nav {
+    display: none !important; /* Hide mobile nav on desktop */
   }
 
   /* Force certain items to span full width */
@@ -184,38 +199,42 @@ html, body, #root {
   .scroll-area > .glass-card:last-child {
     grid-column: span 2;
   }
-
-  .glass-card {
-    height: fit-content;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .bottom-nav {
-    width: 500px;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 30px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    background: rgba(10, 10, 10, 0.8);
-  }
-
-  .login-bg {
-    background: radial-gradient(circle at 50% 50%, #1a1a1a, #000);
-  }
-}
-
-/* Force consistency for specific dashboard elements */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  width: 100%;
 }
 
 @media (max-width: 1023px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
+  .sidebar-desktop {
+    display: none !important;
   }
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  color: #666;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.sidebar-item.active {
+  color: #00f2ff;
+  background: rgba(0, 242, 255, 0.05);
+  box-shadow: inset 4px 0 0 #00f2ff;
+}
+
+.sidebar-item:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* LOGIN SPECIFIC */
