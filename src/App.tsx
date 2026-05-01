@@ -399,8 +399,8 @@ function App() {
 
       <TaskModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTask(null); }} onSave={handleSaveTask} editingTask={editingTask} />
 
-      {/* MOBILE DOCK (Preserved) */}
-      <nav className="h-20 bg-black/80 backdrop-blur-2xl border-t border-white/5 flex lg:hidden items-center justify-around px-4 z-[100]">
+      {/* MOBILE DOCK (Strictly Mobile Only) */}
+      <nav className="fixed bottom-0 left-0 right-0 h-20 bg-black/80 backdrop-blur-2xl border-t border-white/5 flex lg:!hidden items-center justify-around px-4 z-[100]">
         <button onClick={() => setActiveTab('board')} className={`p-3 rounded-xl transition-all ${activeTab === 'board' ? 'text-cyan-400 bg-cyan-500/10' : 'text-slate-500'}`}><LayoutDashboard size={24} /></button>
         <button onClick={() => setActiveTab('levels')} className={`p-3 rounded-xl transition-all ${activeTab === 'levels' ? 'text-cyan-400 bg-cyan-500/10' : 'text-slate-500'}`}><Zap size={24} /></button>
         <button onClick={() => setIsModalOpen(true)} className="w-14 h-14 bg-cyan-400 text-black rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(0,242,255,0.4)] active:scale-95 transition-all -translate-y-4 border-4 border-black"><Plus size={32} strokeWidth={3} /></button>
