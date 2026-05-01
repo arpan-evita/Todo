@@ -284,87 +284,130 @@ function App() {
               {/* LEFT: MISSION HUB */}
               <div className="lg:col-span-8 space-y-8">
                 {/* Supreme Rank Card */}
-                <section className="hidden lg:block relative p-8 rounded-3xl bg-gradient-to-br from-slate-900/50 to-black border border-white/5 overflow-hidden group">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(0,242,255,0.1),transparent_70%)]"></div>
+                <section className="hidden lg:block relative p-8 rounded-3xl bg-[#080808] border border-white/5 overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-600/5"></div>
                   <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-8">
-                      <div>
-                        <div className="flex items-center space-x-3 mb-2">
-                          <span className="px-2.5 py-0.5 bg-cyan-500/10 text-cyan-400 text-[9px] font-label-caps tracking-[0.2em] border border-cyan-500/20 rounded">RANK: LEVEL {level}</span>
-                          <span className="px-2.5 py-0.5 bg-purple-500/10 text-purple-400 text-[9px] font-label-caps tracking-[0.2em] border border-purple-500/20 rounded">SUPREME COMMANDER</span>
-                        </div>
-                        <h2 className="text-5xl font-black text-white italic tracking-tighter uppercase leading-none">CYBER_KNIGHT</h2>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] font-label-caps text-slate-500 tracking-widest mb-1">XP CAPACITY</p>
-                        <p className="text-2xl font-black text-white italic">{15000 - (xp % 15000)} <span className="text-sm text-slate-500 italic">REMAINING</span></p>
+                    <div className="flex items-start justify-between mb-2">
+                      <h2 className="text-6xl font-black text-white italic tracking-tighter uppercase leading-none">CYBER_KNIGHT</h2>
+                      <div className="flex flex-col items-end">
+                        <div className="px-3 py-1 bg-cyan-500/10 text-cyan-400 text-[10px] font-label-caps border border-cyan-500/20 rounded-full mb-4">LEVEL 42</div>
+                        <p className="text-[10px] font-label-caps text-slate-500 tracking-widest mb-1">NEXT LEVEL IN</p>
+                        <p className="text-3xl font-black text-white italic">1,250 XP</p>
                       </div>
                     </div>
+                    <p className="text-cyan-400 font-label-caps text-[10px] tracking-widest uppercase mb-8">RANK: SUPREME COMMANDER • SYSTEM INTEGRITY 98%</p>
                     
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-[10px] font-label-caps text-slate-500 tracking-widest uppercase">
-                        <span>MISSION PROGRESSION</span>
-                        <span className="text-cyan-400">{Math.round(xpProgress)}% OPTIMIZED</span>
-                      </div>
-                      <div className="h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5 p-0.5">
+                    <div className="space-y-4">
+                      <div className="h-2.5 bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
                         <div 
-                          className="h-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-purple-600 rounded-full shadow-[0_0_15px_rgba(0,242,255,0.4)] transition-all duration-1000" 
-                          style={{ width: `${xpProgress}%` }}
+                          className="h-full bg-gradient-to-r from-cyan-400 via-cyan-500 to-purple-600 rounded-full shadow-[0_0_20px_rgba(0,242,255,0.4)] transition-all duration-1000" 
+                          style={{ width: `72%` }}
                         ></div>
+                      </div>
+                      <div className="flex justify-between text-[10px] font-label-caps text-slate-500 tracking-widest uppercase">
+                        <span>3,750 / 5,000 XP</span>
+                        <span className="text-white/60">72% COMPLETE</span>
                       </div>
                     </div>
                   </div>
                 </section>
 
-                {/* Mobile Stats (Preserved) */}
-                <div className="grid grid-cols-2 lg:hidden gap-4">
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                    <p className="text-[10px] font-label-caps text-cyan-400 mb-2">LEVEL</p>
-                    <p className="text-3xl font-black">{level}</p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                    <p className="text-[10px] font-label-caps text-red-500 mb-2">STREAK</p>
-                    <p className="text-3xl font-black">{streak}</p>
-                  </div>
-                </div>
-
                 {/* Task Header */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <h3 className="text-2xl font-black italic uppercase tracking-tighter">Daily Command</h3>
-                  <div className="flex space-x-3">
-                    <button 
-                      onClick={() => setIsModalOpen(true)}
-                      className="hidden lg:flex items-center space-x-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black rounded-xl font-label-caps text-[10px] font-bold transition-all shadow-[0_0_20px_rgba(0,242,255,0.2)] hover:shadow-[0_0_30px_rgba(0,242,255,0.4)]"
-                    >
-                      <span className="material-symbols-outlined text-sm font-bold">add</span>
-                      <span>NEW MISSION</span>
-                    </button>
-                    <button className="text-[10px] font-label-caps text-cyan-400 hover:text-cyan-300 tracking-widest uppercase">View Archive</button>
+                <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                  <div className="flex items-center space-x-3 text-white">
+                    <span className="material-symbols-outlined text-cyan-400 fill-1">reorder</span>
+                    <h3 className="text-2xl font-black italic uppercase tracking-tighter">Daily Command</h3>
                   </div>
+                  <button 
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center space-x-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black rounded-lg font-label-caps text-[10px] font-bold transition-all shadow-[0_0_20px_rgba(0,242,255,0.2)]"
+                  >
+                    + NEW MISSION
+                  </button>
                 </div>
 
-                <TaskBoard tasks={tasks} onUpdateStatus={updateTaskStatus} onEditTask={(t) => { setEditingTask(t); setIsModalOpen(true); }} onDeleteTask={(id) => setTasks(tasks.filter(t => t.id !== id))} />
+                <div className="space-y-4">
+                  {tasks.map(task => (
+                    <div key={task.id} className="group relative p-6 bg-[#080808] border border-white/5 rounded-2xl hover:border-cyan-500/30 transition-all flex items-center">
+                      <div className="mr-6">
+                        <div 
+                          onClick={() => updateTaskStatus(task.id, task.status === 'completed' ? 'active' : 'completed')}
+                          className={`w-6 h-6 rounded border-2 transition-all cursor-pointer flex items-center justify-center ${
+                            task.status === 'completed' ? 'bg-cyan-400 border-cyan-400' : 'border-white/10 hover:border-cyan-400/50'
+                          }`}
+                        >
+                          {task.status === 'completed' && <span className="material-symbols-outlined text-black text-sm font-bold">check</span>}
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className={`text-sm font-bold tracking-tight mb-1 ${task.status === 'completed' ? 'text-slate-500 line-through' : 'text-white'}`}>
+                          {task.title}
+                        </h4>
+                        <p className="text-[10px] text-slate-500 font-label-caps uppercase tracking-widest">Tactical • Due in 2 hours</p>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <span className="px-2 py-0.5 bg-cyan-500/5 text-cyan-400 text-[8px] font-label-caps border border-cyan-500/20 rounded tracking-widest">HIGH PRIORITY</span>
+                        <button className="text-slate-600 hover:text-white transition-colors">
+                          <span className="material-symbols-outlined text-lg">more_vert</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* RIGHT: INTEL WING */}
               <aside className="lg:col-span-4 space-y-8 hidden lg:block">
-                <section className="relative p-8 rounded-3xl bg-gradient-to-br from-slate-900/50 to-black border border-white/5 overflow-hidden group text-center">
-                  <div className="absolute top-0 right-0 p-4">
-                    <span className="material-symbols-outlined text-red-500 animate-pulse">local_fire_department</span>
-                  </div>
+                <section className="relative p-10 rounded-3xl bg-[#080808] border border-white/5 overflow-hidden text-center group">
                   <div className="relative z-10">
-                    <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.1)]">
-                      <Flame size={40} className="text-red-500" fill="currentColor" />
+                    <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-8">
+                      <Flame size={32} className="text-orange-500" fill="currentColor" />
                     </div>
-                    <h4 className="text-6xl font-black text-white italic tracking-tighter">{streak}</h4>
-                    <p className="text-[10px] font-label-caps text-red-400 tracking-[0.3em] uppercase mt-2">Active Day Streak</p>
-                    <div className="mt-6 pt-6 border-t border-white/5">
-                      <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed">System requires {7 - (streak % 7)} more cycles for "ETERNAL FLAME" module activation.</p>
+                    <h4 className="text-7xl font-black text-white italic tracking-tighter leading-none mb-2">{streak}</h4>
+                    <p className="text-[10px] font-label-caps text-orange-500 tracking-[0.3em] uppercase mb-6">Day Streak Active</p>
+                    <p className="text-[10px] text-slate-500 font-medium uppercase leading-relaxed max-w-[200px] mx-auto">Maintain operational consistency for 6 more cycles to unlock the "Eternal Flame" cosmetic module.</p>
+                  </div>
+                </section>
+
+                {/* SQUAD INTEL BRIEF */}
+                <section className="p-8 rounded-3xl bg-[#080808] border border-white/5 space-y-6">
+                  <div className="flex items-center space-x-3 text-cyan-400">
+                    <span className="material-symbols-outlined text-sm">info</span>
+                    <h4 className="text-[10px] font-label-caps tracking-[0.2em] uppercase">Squad Intel Brief</h4>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0"></div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed font-medium">Global mission completion up <span className="text-cyan-400">12%</span> in your sector.</p>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 shrink-0"></div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed font-medium">Operator <span className="text-purple-400">@X_Zero</span> beat your record in tactical refactoring.</p>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5 shrink-0"></div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed font-medium">System maintenance scheduled in 4 cycles. Backup data.</p>
                     </div>
                   </div>
                 </section>
 
-                <Reports tasks={tasks} />
+                {/* MISSION LOG (Calendar) */}
+                <section className="p-8 rounded-3xl bg-[#080808] border border-white/5">
+                  <div className="flex items-center justify-between mb-8">
+                    <h4 className="text-[10px] font-label-caps text-slate-400 tracking-[0.2em] uppercase">Mission Log</h4>
+                    <span className="text-[9px] font-label-caps text-slate-600 uppercase">October 2023</span>
+                  </div>
+                  <div className="grid grid-cols-7 gap-y-4 text-center">
+                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(day => (
+                      <span key={day} className="text-[9px] font-label-caps text-slate-700">{day}</span>
+                    ))}
+                    {[28, 29, 30, 1, 2, 3, 4, 5, 6, 7, 8].map((date, i) => (
+                      <div key={i} className={`text-[10px] font-bold ${date === 3 ? 'text-cyan-400 p-1.5 border border-cyan-400/50 rounded-lg bg-cyan-400/10' : 'text-slate-600'}`}>
+                        {date}
+                      </div>
+                    ))}
+                  </div>
+                </section>
               </aside>
             </div>
           )}
