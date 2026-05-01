@@ -36,6 +36,15 @@ function App() {
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
   const [streak, setStreak] = useState(0);
+  const [profile, setProfile] = useState<{
+    full_name: string;
+    avatar_url: string;
+    social_links: any;
+  }>({
+    full_name: '',
+    avatar_url: '',
+    social_links: {}
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -73,6 +82,11 @@ function App() {
       setXp(data.xp || 0);
       setLevel(data.level || 1);
       setStreak(data.streak || 0);
+      setProfile({
+        full_name: data.full_name || '',
+        avatar_url: data.avatar_url || '',
+        social_links: data.social_links || {}
+      });
     }
   };
 
@@ -427,7 +441,7 @@ function App() {
 
           {activeTab === 'levels' && <Leaderboard currentUser={{ name: session.user.email?.split('@')[0] || 'Pilot', level, xp, img: PILOT_IMG }} />}
           {activeTab === 'reports' && <Reports tasks={tasks} />}
-          {activeTab === 'profile' && <LevelBoard xp={xp} level={level} streak={streak} tasks={tasks} />}
+          {activeTab === 'profile' && <LevelBoard xp={xp} level={level} streak={streak} tasks={tasks} profile={profile} onUpdate={fetchProfile} userId={session.user.id} />}
         </div>
 
         {/* Right Sidebar */}
