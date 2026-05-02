@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Send, X, Terminal, Zap, BarChart3, Target, Activity } from 'lucide-react';
 import { detectOperativeState, OperativeState } from '../lib/ai/stateDetection';
-import { generateCoachingResponse } from '../lib/ai/responseEngine';
+import { generateCoachingResponse, generateIntelligentResponse, AIIntent } from '../lib/ai/responseEngine';
 import { supabase } from '../lib/supabase';
 import { calculateLevel } from '../lib/gameLogic';
 
@@ -13,13 +13,34 @@ export default function AICoach({ userId }: { userId: string }) {
   const [message, setMessage] = useState('');
   const [state, setState] = useState<OperativeState>('neutral');
   const [chat, setChat] = useState<{ role: 'ai' | 'user'; text: any }[]>([
-    { role: 'ai', text: 'NEURAL LINK STABLE. Initializing emotional state analysis...' }
+    { role: 'ai', text: "Hi there! I'm your productivity coach. I've been looking over your progress—how can I help you stay on track today?" }
   ]);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) updateState();
+    if (isOpen) {
+      updateState();
+      fetchProfile();
+    }
   }, [isOpen]);
+
+  const fetchProfile = async () => {
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (data) {
+      setProfile(data);
+      setChat(prev => {
+        if (prev.length === 1 && prev[0].role === 'ai') {
+          const name = data.full_name?.split(' ')[0] || 'Arpan';
+          return [{
+            role: 'ai',
+            text: `Hi ${name}! I'm your productivity coach. I've been looking over your progress—how can I help you stay on track today?`
+          }];
+        }
+        return prev;
+      });
+    }
+  };
 
   const updateState = async (text?: string) => {
     const result = await detectOperativeState(userId, text);
@@ -33,19 +54,29 @@ export default function AICoach({ userId }: { userId: string }) {
     setChat(prev => [...prev, { role: 'user', text: command }]);
     setMessage('');
     
-    // 1. Detect state from text + behavior
+    // 1. Detect Intent from keywords
+    let intent: AIIntent = 'general';
+    const lower = command.toLowerCase();
+    if (lower.includes('plan')) intent = 'plan';
+    else if (lower.includes('strategy') || lower.includes('how to')) intent = 'strategy';
+    else if (lower.includes('low') || lower.includes('sad') || lower.includes('tired') || lower.includes('motivate')) intent = 'motivation';
+    else if (lower.includes('teach') || lower.includes('knowledge') || lower.includes('concept')) intent = 'knowledge';
+
+    // 2. Detect state
     const currentState = await updateState(command);
 
-    // 2. Fetch data for response
+    // 3. Fetch data for response
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    const { count: pending } = await supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'pending');
+    const { data: pendingTasks } = await supabase.from('tasks').select('*').eq('user_id', userId).eq('status', 'pending');
 
-    // 3. Generate adaptive response
-    const coaching = await generateCoachingResponse(currentState, {
+    // 4. Generate response
+    const coaching = await generateIntelligentResponse(intent, currentState, {
       xp: profile?.xp || 0,
       streak: profile?.streak || 0,
-      pending: pending || 0,
-      level: calculateLevel(profile?.xp || 0)
+      pendingTasks: pendingTasks || [],
+      level: calculateLevel(profile?.xp || 0),
+      mode: profile?.mode || 'Builder',
+      name: profile?.full_name?.split(' ')[0] || 'Arpan'
     });
     
     setTimeout(() => {
@@ -54,9 +85,9 @@ export default function AICoach({ userId }: { userId: string }) {
         text: (
           <div className="space-y-3">
             <p className="font-black text-[#00f2ff]">{coaching.tone}</p>
-            <p><span className="text-slate-500 mr-2">INSIGHT:</span>{coaching.insight}</p>
-            <p><span className="text-slate-500 mr-2">ACTION:</span>{coaching.action}</p>
-            <p className="text-[10px] text-red-400 italic"><span className="text-slate-500 mr-2">URGENCY:</span>{coaching.urgency}</p>
+            <p><span className="text-slate-500 mr-2 uppercase text-[9px] tracking-widest">My Take:</span>{coaching.insight}</p>
+            <p><span className="text-slate-500 mr-2 uppercase text-[9px] tracking-widest">Suggestion:</span>{coaching.action}</p>
+            <p className="text-[10px] text-red-400 italic"><span className="text-slate-500 mr-2 uppercase text-[9px] tracking-widest italic">Note:</span>{coaching.urgency}</p>
           </div>
         ) 
       }]);
@@ -93,8 +124,8 @@ export default function AICoach({ userId }: { userId: string }) {
                   <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-500 border-2 border-black animate-pulse" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-white">Coach • <span className="text-[#00f2ff]">{state.toUpperCase()}</span></h3>
-                  <p className="text-[8px] font-mono text-slate-500">STATE: {state === 'peak' ? 'CRITICAL_MOMENTUM' : 'STABLE'}</p>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-white">Coach • <span className="text-[#00f2ff]">{state === 'peak' ? 'IN THE FLOW' : state.toUpperCase()}</span></h3>
+                  <p className="text-[8px] font-mono text-slate-500">STATUS: {state === 'peak' ? 'MAX MOMENTUM' : 'ACTIVE'}</p>
                 </div>
 
               </div>
@@ -119,7 +150,7 @@ export default function AICoach({ userId }: { userId: string }) {
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-[#00f2ff]/5 p-4 rounded-2xl animate-pulse text-slate-500">
-                    DECRYPTING_NEURAL_SIGNALS...
+                    Checking your progress...
                   </div>
                 </div>
               )}
@@ -135,11 +166,25 @@ export default function AICoach({ userId }: { userId: string }) {
                 <span>Plan Day</span>
               </button>
               <button 
-                onClick={() => handleCommand('Analyze me')}
+                onClick={() => handleCommand('Get strategy')}
                 className="flex items-center justify-center space-x-2 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all text-[10px] font-bold uppercase tracking-widest"
               >
-                <BarChart3 size={14} className="text-purple-500" />
-                <span>Analyze</span>
+                <Target size={14} className="text-purple-500" />
+                <span>Strategy</span>
+              </button>
+              <button 
+                onClick={() => handleCommand('I feel low')}
+                className="flex items-center justify-center space-x-2 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/5 transition-all text-[10px] font-bold uppercase tracking-widest"
+              >
+                <Activity size={14} className="text-red-500" />
+                <span>Motivation</span>
+              </button>
+              <button 
+                onClick={() => handleCommand('Teach me')}
+                className="flex items-center justify-center space-x-2 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-[10px] font-bold uppercase tracking-widest"
+              >
+                <BarChart3 size={14} className="text-emerald-500" />
+                <span>Knowledge</span>
               </button>
             </div>
 
@@ -148,7 +193,7 @@ export default function AICoach({ userId }: { userId: string }) {
               <div className="relative">
                 <input 
                   type="text"
-                  placeholder="TRANSMIT COMMAND..."
+                  placeholder="How can I help you today?"
                   className="w-full bg-black/50 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-xs text-white placeholder:text-slate-700 outline-none focus:border-[#00f2ff]/50 transition-all"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}

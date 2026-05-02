@@ -53,7 +53,7 @@ export default function AIInsights({ userId }: { userId: string }) {
 
         <div className="flex-1">
           <p className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest mb-2">
-            AI Operational Intel • {current.type}
+            Coach's Insight • {current.type}
           </p>
           <p className="text-sm font-bold text-white leading-relaxed">
             "{current.text}"

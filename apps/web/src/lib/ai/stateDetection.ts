@@ -34,22 +34,22 @@ export const detectOperativeState = async (userId: string, textInput?: string): 
     // OVERWHELMED: Too many pending tasks
     else if (pendingCount > 8) {
       state = 'overwhelmed';
-      signals.push(`Task bloat detected: ${pendingCount} mandates pending`);
+      signals.push(`Large backlog: ${pendingCount} tasks pending`);
     }
     // PEAK: High XP today or intense recent activity
     else if (profile.xp_today > 300 || (logs && logs.filter(l => l.action === 'task_completed').length > 3)) {
       state = 'peak';
-      signals.push('High-frequency task completion sequence');
+      signals.push('Excellent momentum');
     }
     // DRIVEN: Healthy streak + recent completion
     else if (streak > 3 && inactivityHours < 4) {
       state = 'driven';
-      signals.push('Consistent operative rhythm');
+      signals.push('Strong, consistent pace');
     }
     // LAZY: Inactive for several hours during daytime
     else if (inactivityHours > 4 && inactivityHours < 12) {
       state = 'lazy';
-      signals.push('Passive monitoring detected');
+      signals.push('Low activity period');
     }
     // FRUSTRATED: Multiple mode changes or task deletions (simulated)
     else if (logs && logs.filter(l => l.action === 'mode_change').length > 2) {
@@ -64,7 +64,7 @@ export const detectOperativeState = async (userId: string, textInput?: string): 
       if (lowerText.match(/hard|stressed|too much|help/)) state = 'overwhelmed';
       if (lowerText.match(/angry|stupid|wrong|fix/)) state = 'frustrated';
       if (lowerText.match(/done|ready|lets go|push/)) state = 'driven';
-      signals.push('Neural text signal processed');
+      signals.push('Text sentiment analyzed');
     }
 
     // 4. Update State in DB

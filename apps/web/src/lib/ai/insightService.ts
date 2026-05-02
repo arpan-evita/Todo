@@ -34,18 +34,31 @@ export const generateInsights = async (userId: string) => {
     const xpToNext = 1000 - (xp % 1000);
     if (xpToNext < 300) {
       insights.push({
-        text: `You are only ${xpToNext} XP away from Level ${calculateLevel(xp) + 1}. Complete 2 missions to evolve.`,
+        text: `You're only ${xpToNext} XP away from Level ${calculateLevel(xp) + 1}. Just a couple more tasks and you'll level up!`,
         type: 'opportunity'
       });
     }
 
     // B. Productivity Patterns (Performance)
     const completions = logs.filter(l => l.action === 'task_completed');
+    
+    // Velocity Check
+    const today = new Date().toDateString();
+    const completionsToday = completions.filter(l => new Date(l.timestamp).toDateString() === today).length;
+    const avgCompletions = completions.length / 7;
+
+    if (completionsToday > avgCompletions && completionsToday > 0) {
+      insights.push({
+        text: `You're crushing it today! You've already done ${completionsToday} tasks, which is better than your usual daily average.`,
+        type: 'performance'
+      });
+    }
+
     if (completions.length > 0) {
       const hours = completions.map(l => new Date(l.timestamp).getHours());
       const peakHour = mode(hours);
       insights.push({
-        text: `Neural analysis shows your peak productivity spike at ${peakHour}:00. Deploy your hardest missions then.`,
+        text: `I've noticed you're usually most productive around ${peakHour}:00. Maybe try to schedule your hardest tasks for then?`,
         type: 'performance'
       });
     }
@@ -54,7 +67,7 @@ export const generateInsights = async (userId: string) => {
     const moneyModeTasks = logs.filter(l => l.action === 'task_completed' && l.metadata?.mode === 'Money');
     if (profile.mode === 'Money' && moneyModeTasks.length === 0) {
       insights.push({
-        text: "You are in Money Mode but haven't secured any revenue-generating mandates today. Focus on income actions.",
+        text: "You're in Money Mode but haven't checked off any revenue-focused tasks today. Want to pick one to work on?",
         type: 'warning'
       });
     }
@@ -65,7 +78,7 @@ export const generateInsights = async (userId: string) => {
       const diffHours = (Date.now() - lastActive.getTime()) / (1000 * 60 * 60);
       if (diffHours > 20) {
         insights.push({
-          text: `Neural link degradation detected. Deploy a mission within 4 hours to maintain your ${profile.streak}-day streak.`,
+          text: `Don't let that ${profile.streak}-day streak slip away! Try to get just one task done in the next few hours to keep it going.`,
           type: 'warning'
         });
       }
