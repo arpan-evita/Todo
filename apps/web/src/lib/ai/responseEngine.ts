@@ -1,4 +1,12 @@
 import { STRATEGIES } from './strategyLibrary';
+import { OperativeState } from './stateDetection';
+
+export interface CoachingResponse {
+  insight: string;
+  action: string;
+  urgency: string;
+  tone: string;
+}
 
 export type AIIntent = 'general' | 'plan' | 'strategy' | 'motivation' | 'knowledge';
 
