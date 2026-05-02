@@ -67,7 +67,7 @@ export default function AICoach({ userId }: { userId: string }) {
 
     // 3. Fetch data for response
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    const { data: pendingTasks } = await supabase.from('tasks').select('*').eq('user_id', userId).eq('status', 'todo');
+    const { data: pendingTasks } = await supabase.from('tasks').select('*').eq('userId', userId).eq('status', 'todo');
 
     // 4. Generate response
     const coaching = await generateIntelligentResponse(intent, currentState, {

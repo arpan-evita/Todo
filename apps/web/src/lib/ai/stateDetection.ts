@@ -12,7 +12,7 @@ export const detectOperativeState = async (userId: string, textInput?: string): 
   try {
     // 1. Fetch recent behavioral data
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    const { data: tasks } = await supabase.from('tasks').select('*').eq('user_id', userId).eq('status', 'todo');
+    const { data: tasks } = await supabase.from('tasks').select('*').eq('userId', userId).eq('status', 'todo');
     const { data: logs } = await supabase.from('UserActivityLog').select('*').eq('userId', userId).order('timestamp', { ascending: false }).limit(20);
 
     if (!profile) return { state: 'neutral', confidence: 0.5, signals: ['No profile data'] };

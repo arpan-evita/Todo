@@ -124,7 +124,7 @@ export default function Dashboard() {
     const { data } = await supabase
       .from('tasks')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('userId', session.user.id)
       .order('created_at', { ascending: false });
     if (data) setTasks(data);
   };
@@ -180,7 +180,7 @@ export default function Dashboard() {
     } else {
       const { data } = await supabase.from('tasks').insert([{ 
         ...taskData, 
-        user_id: session.user.id,
+        userId: session.user.id,
         status: 'todo' // Explicitly set status to match UI filter
       }]).select().single();
       if (data) logActivity(session.user.id, 'task_created', { task_id: data.id, title: data.title });
