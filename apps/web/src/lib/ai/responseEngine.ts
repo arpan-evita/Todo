@@ -10,6 +10,44 @@ export interface CoachingResponse {
 
 export type AIIntent = 'general' | 'plan' | 'strategy' | 'motivation' | 'knowledge';
 
+const TONE_MAP: Record<OperativeState, any> = {
+  driven: {
+    prefix: "YOU'RE ON A ROLL!",
+    tone: "Energetic, Motivating",
+    example: "You’re absolutely crushing it right now. Let's keep this momentum going!"
+  },
+  peak: {
+    prefix: "UNSTOPPABLE MODE!",
+    tone: "High Energy, Supportive",
+    example: "You're in the flow! This is the perfect time to tackle those big goals while you're feeling this sharp."
+  },
+  overwhelmed: {
+    prefix: "LET'S BREATHE.",
+    tone: "Calm, Kind, Simplifying",
+    example: "It feels like a lot right now, doesn't it? Let's take a step back and just focus on one small thing first."
+  },
+  frustrated: {
+    prefix: "STAY WITH ME.",
+    tone: "Empathetic, Grounded",
+    example: "I know it's frustrating when things don't go as planned. Let's reset and find a simple win to get back on track."
+  },
+  demotivated: {
+    prefix: "WE'VE GOT THIS.",
+    tone: "Encouraging, Vision-focused",
+    example: "Everyone has off days. Let's not worry about the big picture for a second—what's one tiny thing we can do right now?"
+  },
+  lazy: {
+    prefix: "GENTLE PUSH.",
+    tone: "Direct but Friendly",
+    example: "I've noticed we've been sitting still for a bit. How about we just do 5 minutes of work to break the ice?"
+  },
+  neutral: {
+    prefix: "STEADY PROGRESS.",
+    tone: "Balanced, Consistent",
+    example: "You're keeping a good pace. Let's just keep ticking those boxes one by one."
+  }
+};
+
 export const generateIntelligentResponse = async (
   intent: AIIntent,
   state: OperativeState,
