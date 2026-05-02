@@ -27,12 +27,22 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
     setLoading(true);
     const { data } = await supabase
       .from('profiles')
-      .select('id, full_name, xp, level, avatar_url')
+      .select(`
+        id, 
+        full_name, 
+        xp, 
+        level, 
+        avatar_url,
+        user_achievements (
+          achievementId
+        )
+      `)
       .order('xp', { ascending: false })
       .limit(50);
-
     
-    if (data) setLeaders(data);
+    if (data) {
+      setLeaders(data);
+    }
     setLoading(false);
   };
 
@@ -44,7 +54,7 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
     return { ...leader, rank };
   });
 
-  const currentUserData = rankedLeaders.find(l => l.id === (currentUser as any).id);
+  const currentUserData = rankedLeaders.find(l => l.id === currentUser.id);
   const displayRank = currentUserData ? `#${currentUserData.rank}` : '#--';
   const displayPercentile = currentUserData ? `Top ${Math.round((currentUserData.rank / Math.max(leaders.length, 1)) * 100)}%` : 'Top 1%';
 
@@ -73,7 +83,7 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`glass-panel p-5 rounded-2xl flex items-center justify-between group hover:border-[#00f2ff]/30 transition-all ${leader.rank <= 3 ? 'border-l-4 border-l-[#00f2ff]' : ''} ${leader.id === (currentUser as any).id ? 'bg-[#00f2ff]/5 border-[#00f2ff]/30' : ''}`}
+              className={`glass-panel p-5 rounded-2xl flex items-center justify-between group hover:border-[#00f2ff]/30 transition-all ${leader.rank <= 3 ? 'border-l-4 border-l-[#00f2ff]' : ''} ${leader.id === currentUser.id ? 'bg-[#00f2ff]/5 border-[#00f2ff]/30' : ''}`}
             >
               <div className="flex items-center space-x-6">
                 <div className="w-8 text-center text-xl font-black italic text-slate-700 group-hover:text-[#00f2ff] transition-colors">{leader.rank}</div>
@@ -81,10 +91,30 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
                    <img src={leader.avatar_url || 'https://lh3.googleusercontent.com/a/default-user'} className="w-full h-full object-cover" alt="Operative" />
                 </div>
                 <div>
-                   <h4 className="font-bold text-white uppercase tracking-tight">
-                     {leader.full_name || `OPERATIVE-${leader.id?.slice(0, 4).toUpperCase()}`}
-                     {leader.id === (currentUser as any).id && <span className="ml-2 text-[8px] bg-[#00f2ff] text-black px-1.5 py-0.5 rounded">YOU</span>}
-                   </h4>
+                   <div className="flex items-center space-x-2">
+                     <h4 className="font-bold text-white uppercase tracking-tight">
+                       {leader.full_name || `OPERATIVE-${leader.id?.slice(0, 4).toUpperCase()}`}
+                     </h4>
+                     {leader.id === currentUser.id && <span className="text-[8px] bg-[#00f2ff] text-black px-1.5 py-0.5 rounded font-black">YOU</span>}
+                     {/* Badges Display */}
+                     <div className="flex items-center space-x-1">
+                        {leader.user_achievements?.map((ach: any) => {
+                          const iconMap: Record<string, string> = {
+                            streak_7: '🔥',
+                            streak_15: '⚡',
+                            streak_30: '🌀',
+                            xp_10k: '💎',
+                            ascended: '👑',
+                            first_task: '🎯'
+                          };
+                          return (
+                            <span key={ach.achievementId} title={ach.achievementId} className="text-[12px] filter drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] cursor-help">
+                              {iconMap[ach.achievementId] || '🏅'}
+                            </span>
+                          );
+                        })}
+                     </div>
+                   </div>
                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Level {calculateLevel(leader.xp)} • {leader.xp.toLocaleString()} XP</p>
                 </div>
               </div>

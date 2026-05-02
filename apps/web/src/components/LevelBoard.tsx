@@ -114,11 +114,13 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Badge icon={<ShieldCheck />} label="Disciplined" detail="7 Day Streak Required" active={streak >= 7} color="#00f2ff" />
-        <Badge icon={<Zap />} label="High Energy" detail="10 Missions Secured" active={completedTasks >= 10} color="#ffb800" />
-        <Badge icon={<Target />} label="Goal Getter" detail="20 Missions Secured" active={completedTasks >= 20} color="#00ff88" />
-        <Badge icon={<Award />} label="Elite Master" detail="Reach Rank 5" active={level >= 5} color="#7000ff" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Badge icon={<ShieldCheck />} label="Disciplined" detail="7 Day Streak Secured" active={streak >= 7} color="#00f2ff" />
+        <Badge icon={<Zap />} label="Persistence Legend" detail="15 Day Streak Secured" active={streak >= 15} color="#ffb800" />
+        <Badge icon={<Trophy />} label="Unstoppable" detail="30 Day Streak Secured" active={streak >= 30} color="#ff3e3e" />
+        <Badge icon={<Target />} label="High Impact" detail="50 Missions Secured" active={completedTasks >= 50} color="#00ff88" />
+        <Badge icon={<Award />} label="Elite Master" detail="Reach Level 10" active={level >= 10} color="#7000ff" />
+        <Badge icon={<Globe />} label="Ascended" detail="Reach Level 100" active={level >= 100} color="#fff" />
       </div>
     </div>
   );

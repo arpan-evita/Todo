@@ -160,17 +160,16 @@ export default function Dashboard() {
     await supabase.from('profiles').update({ xp: newXp, level: newLevel }).eq('id', session.user.id);
     
     // Check Achievements
-    const { data: achievements } = await supabase.from('user_achievements').select('achievement_id').eq('user_id', session.user.id);
-    const existingIds = (achievements || []).map(a => a.achievement_id);
+    const { data: achievements } = await supabase.from('user_achievements').select('achievementId').eq('userId', session.user.id);
+    const existingIds = (achievements || []).map(a => a.achievementId);
     const newAchievements = checkNewAchievements({ xp: newXp, streak, completedCount: tasks.filter(t => t.status === 'done').length }, existingIds);
     
     if (newAchievements.length > 0) {
       for (const ach of newAchievements) {
-        await supabase.from('user_achievements').insert([{ user_id: session.user.id, achievement_id: ach.id }]);
+        await supabase.from('user_achievements').insert([{ userId: session.user.id, achievementId: ach.id }]);
         alert(`MISSION ACCOMPLISHED: Unlocked "${ach.title}"!`);
         sendNotification('NEW ACHIEVEMENT UNLOCKED', `You have been awarded the "${ach.title}" medal.`);
       }
-
     }
   };
 

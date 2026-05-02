@@ -22,6 +22,20 @@ export const ACHIEVEMENTS: Achievement[] = [
     check: ({ streak }) => streak >= 7
   },
   {
+    id: 'streak_15',
+    title: 'Persistence Legend',
+    description: 'Maintain a 15-day operational streak.',
+    icon: '⚡',
+    check: ({ streak }) => streak >= 15
+  },
+  {
+    id: 'streak_30',
+    title: 'Unstoppable Force',
+    description: 'Maintain a 30-day operational streak.',
+    icon: '🌀',
+    check: ({ streak }) => streak >= 30
+  },
+  {
     id: 'xp_10k',
     title: 'Elite Operative',
     description: 'Accumulate 10,000 XP.',
