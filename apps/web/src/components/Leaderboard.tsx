@@ -8,6 +8,7 @@ import { calculateLevel } from '../lib/gameLogic';
 
 interface LeaderboardProps {
   currentUser: {
+    id: string;
     name: string;
     level: number;
     xp: number;

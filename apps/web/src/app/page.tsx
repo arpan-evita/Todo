@@ -341,7 +341,7 @@ export default function Dashboard() {
               </>
             )}
 
-            {activeTab === 'levels' && <Leaderboard currentUser={{ name: profile.full_name || 'Pilot', level, xp, img: profile.avatar_url || PILOT_IMG }} />}
+            {activeTab === 'levels' && <Leaderboard currentUser={{ id: session.user.id, name: profile.full_name || 'Pilot', level, xp, img: profile.avatar_url || PILOT_IMG }} />}
             {activeTab === 'reports' && <Reports tasks={tasks} />}
             {activeTab === 'profile' && <LevelBoard xp={xp} level={level} streak={streak} tasks={tasks} profile={profile} onUpdate={initialize} userId={session.user.id} />}
             {activeTab === 'settings' && (
