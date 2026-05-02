@@ -1,5 +1,5 @@
 export type Priority = 'low' | 'medium' | 'high';
-export type Status = 'todo' | 'in-progress' | 'done';
+export type Status = 'pending' | 'in-progress' | 'completed';
 export type MissionType = 'daily' | 'weekly' | 'boss';
 
 export interface Task {

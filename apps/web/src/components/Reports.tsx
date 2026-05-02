@@ -22,13 +22,13 @@ interface ReportsProps {
 }
 
 export default function Reports({ tasks }: ReportsProps) {
-  const completedTasks = tasks.filter(t => t.status === 'done');
+  const completedTasks = tasks.filter(t => t.status === 'completed');
   
   // XP by Module
   const moduleData = tasks.reduce((acc: any, task) => {
     const module = task.module || 'General';
     if (!acc[module]) acc[module] = { name: module, xp: 0, count: 0 };
-    if (task.status === 'done') acc[module].xp += task.xp || 150;
+    if (task.status === 'completed') acc[module].xp += task.xp || 150;
     acc[module].count += 1;
     return acc;
   }, {});
@@ -80,9 +80,9 @@ export default function Reports({ tasks }: ReportsProps) {
               <PieChart>
                 <Pie
                   data={[
-                    { name: 'Completed', value: tasks.filter(t => t.status === 'done').length },
+                    { name: 'Completed', value: tasks.filter(t => t.status === 'completed').length },
                     { name: 'Active', value: tasks.filter(t => t.status === 'in-progress').length },
-                    { name: 'Pending', value: tasks.filter(t => t.status === 'todo').length },
+                    { name: 'Pending', value: tasks.filter(t => t.status === 'pending').length },
                   ]}
                   innerRadius={60}
                   outerRadius={80}
