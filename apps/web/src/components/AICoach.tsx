@@ -73,7 +73,7 @@ export default function AICoach({ userId }: { userId: string }) {
     const coaching = await generateIntelligentResponse(intent, currentState, {
       xp: profile?.xp || 0,
       streak: profile?.streak || 0,
-      pendingTasks: pendingTasks || [],
+      pendingTasks: pendingTasks?.map((t: any) => ({ ...t, xp: t.xpReward })) || [],
       level: calculateLevel(profile?.xp || 0),
       mode: profile?.mode || 'Builder',
       name: profile?.full_name?.split(' ')[0] || 'Arpan'

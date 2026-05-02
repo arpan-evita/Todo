@@ -121,12 +121,24 @@ export default function Dashboard() {
   };
 
   const fetchTasks = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('tasks')
       .select('*')
       .eq('userId', session.user.id)
       .order('created_at', { ascending: false });
-    if (data) setTasks(data);
+    
+    if (error) {
+      console.error('FETCH_TASKS_ERROR:', error);
+    }
+    
+    if (data) {
+      const mappedTasks = data.map((t: any) => ({
+        ...t,
+        xp: t.xpReward,
+        due_date: t.deadline
+      }));
+      setTasks(mappedTasks);
+    }
   };
 
   const updateTaskStatus = async (task: Task, newStatus: Status) => {
@@ -175,14 +187,34 @@ export default function Dashboard() {
 
   const handleSaveTask = async (taskData: any) => {
     if (editingTask) {
-      await supabase.from('tasks').update(taskData).eq('id', editingTask.id);
+      const { error } = await supabase.from('tasks').update({
+        title: taskData.title,
+        description: taskData.description,
+        priority: taskData.priority,
+        type: taskData.type,
+        xpReward: taskData.xp,
+        deadline: taskData.due_date,
+        status: taskData.status || editingTask.status,
+      }).eq('id', editingTask.id);
+      if (error) console.error('TASK_UPDATE_ERROR:', error);
     } else {
-      const { data } = await supabase.from('tasks').insert([{ 
-        ...taskData, 
+      const { data, error } = await supabase.from('tasks').insert([{ 
+        title: taskData.title,
+        description: taskData.description,
+        priority: taskData.priority,
+        type: taskData.type,
+        xpReward: taskData.xp,
+        deadline: taskData.due_date,
         userId: session.user.id,
-        status: 'todo' // Explicitly set status to match UI filter
+        status: 'pending'
       }]).select().single();
-      if (data) logActivity(session.user.id, 'task_created', { task_id: data.id, title: data.title });
+      
+      if (error) {
+        console.error('TASK_INSERT_ERROR:', error);
+        alert(`MISSION FAILED: ${error.message}`);
+      } else if (data) {
+        logActivity(session.user.id, 'task_created', { task_id: data.id, title: data.title });
+      }
     }
     fetchTasks();
 
@@ -274,12 +306,12 @@ export default function Dashboard() {
                 {/* Missions */}
                 <div className="space-y-12">
                   {[
-                    { id: 'todo', label: 'DAILY_COMMAND', color: 'text-[#00f2ff]' },
+                    { id: 'pending', label: 'DAILY_COMMAND', color: 'text-[#00f2ff]' },
                     { id: 'in-progress', label: 'ACTIVE_OPS', color: 'text-yellow-400' },
-                    { id: 'done', label: 'COMPLETED_MANDATES', color: 'text-green-400' }
+                    { id: 'completed', label: 'COMPLETED_MANDATES', color: 'text-green-400' }
                   ].map(phase => {
                     const phaseTasks = tasks.filter(t => t.status === phase.id);
-                    if (phaseTasks.length === 0 && phase.id !== 'todo') return null;
+                    if (phaseTasks.length === 0 && phase.id !== 'pending') return null;
                     return (
                       <div key={phase.id} className="space-y-4">
                          <div className="flex justify-between items-center px-2">
@@ -287,7 +319,7 @@ export default function Dashboard() {
                              <div className={`w-1 h-4 rounded-full bg-current ${phase.color}`} />
                              <h3 className={`text-[10px] font-black tracking-[0.3em] uppercase ${phase.color}`}>{phase.label} <span className="opacity-40">[{phaseTasks.length}]</span></h3>
                            </div>
-                           {phase.id === 'todo' && <button onClick={() => setIsModalOpen(true)} className="bg-[#00f2ff] text-black text-[10px] font-bold px-5 py-2 rounded-lg hover:shadow-[0_0_25px_rgba(0,242,255,0.4)] transition-all uppercase tracking-widest">+ NEW MISSION</button>}
+                           {phase.id === 'pending' && <button onClick={() => setIsModalOpen(true)} className="bg-[#00f2ff] text-black text-[10px] font-bold px-5 py-2 rounded-lg hover:shadow-[0_0_25px_rgba(0,242,255,0.4)] transition-all uppercase tracking-widest">+ NEW MISSION</button>}
                          </div>
                          <div className="space-y-3">
                            {phaseTasks.map(task => (
@@ -296,18 +328,18 @@ export default function Dashboard() {
                                className="glass-panel p-5 rounded-xl flex items-center justify-between border-transparent hover:border-[#00f2ff]/30 transition-all cursor-pointer group"
                                onClick={(e) => {
                                   if ((e.target as HTMLElement).closest('.task-actions')) return;
-                                  const next: any = task.status === 'todo' ? 'in-progress' : task.status === 'in-progress' ? 'done' : 'todo';
+                                  const next: any = task.status === 'pending' ? 'in-progress' : task.status === 'in-progress' ? 'completed' : 'pending';
                                   updateTaskStatus(task, next);
                                }}
                              >
                                <div className="flex items-center space-x-5 flex-1 min-w-0">
-                                 <div className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-all ${task.status === 'done' ? 'bg-green-500 border-green-500' : task.status === 'in-progress' ? 'border-yellow-500' : 'border-[#00f2ff]/30'}`}>
-                                    {task.status === 'done' && <Check size={14} className="text-black" />}
+                                 <div className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-all ${task.status === 'completed' ? 'bg-green-500 border-green-500' : task.status === 'in-progress' ? 'border-yellow-500' : 'border-[#00f2ff]/30'}`}>
+                                    {task.status === 'completed' && <Check size={14} className="text-black" />}
                                     {task.status === 'in-progress' && <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />}
                                  </div>
                                  <div className="flex-1 min-w-0">
                                    <div className="flex items-center space-x-2">
-                                      <h4 className={`font-bold truncate ${task.status === 'done' ? 'line-through text-slate-500' : ''}`}>{task.title}</h4>
+                                      <h4 className={`font-bold truncate ${task.status === 'completed' ? 'line-through text-slate-500' : ''}`}>{task.title}</h4>
                                       {task.link && <a href={task.link} target="_blank" rel="noreferrer" className="text-[#00f2ff] task-actions"><ExternalLink size={14} /></a>}
                                    </div>
                                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-none mt-1">{task.module} • {task.type || 'DAILY'}</p>
@@ -410,7 +442,7 @@ export default function Dashboard() {
              <section className="glass-panel p-6 rounded-2xl border-[#00f2ff]/10">
                 <h3 className="text-[10px] font-bold text-[#00f2ff] tracking-[0.2em] uppercase border-b border-white/5 pb-4 mb-6 flex items-center"><Info size={14} className="mr-2" /> OPERATIONAL INTEL</h3>
                 <div className="space-y-6">
-                   <div className="flex items-start space-x-4"><div className="w-2 h-2 mt-1.5 rounded-full bg-[#00f2ff] shadow-[0_0_10px_rgba(0,242,255,0.6)]" /><p className="text-xs text-slate-300 leading-relaxed font-medium">Efficiency: <span className="text-[#00f2ff] font-bold">{tasks.length > 0 ? Math.round((tasks.filter(t => t.status === 'done').length / tasks.length) * 100) : 0}%</span> across all sectors.</p></div>
+                   <div className="flex items-start space-x-4"><div className="w-2 h-2 mt-1.5 rounded-full bg-[#00f2ff] shadow-[0_0_10px_rgba(0,242,255,0.6)]" /><p className="text-xs text-slate-300 leading-relaxed font-medium">Efficiency: <span className="text-[#00f2ff] font-bold">{tasks.length > 0 ? Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100) : 0}%</span> across all sectors.</p></div>
                    <div className="flex items-start space-x-4"><div className="w-2 h-2 mt-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(112,0,255,0.6)]" /><p className="text-xs text-slate-300 leading-relaxed font-medium">Identity Mode: <span className="text-purple-400 font-bold">{profile.mode || 'Builder'}</span>. XP Yield: <span className="text-purple-400 font-bold">x1.25</span>.</p></div>
                 </div>
              </section>
