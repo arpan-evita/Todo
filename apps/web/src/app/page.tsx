@@ -145,23 +145,21 @@ export default function Dashboard() {
     const oldStatus = task.status;
     const { error } = await supabase.from('tasks').update({ 
       status: newStatus, 
-      completed_at: newStatus === 'done' ? new Date().toISOString() : null 
+      completedAt: newStatus === 'completed' ? new Date().toISOString() : null 
     }).eq('id', task.id);
     
     if (!error) {
-      if (newStatus === 'done' && oldStatus !== 'done') {
+      if (newStatus === 'completed' && oldStatus !== 'completed') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         grantXp(finalXp);
         sendNotification('MISSION ACCOMPLISHED', `Mandate "${task.title}" secured. +${finalXp} XP acquired.`);
         logActivity(session.user.id, 'task_completed', { task_id: task.id, title: task.title, xp_earned: finalXp });
-      } else if (oldStatus === 'done' && newStatus !== 'done') {
+      } else if (oldStatus === 'completed' && newStatus !== 'completed') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         grantXp(-finalXp);
       }
       fetchTasks();
     }
-
-
   };
 
   const grantXp = async (amount: number) => {
