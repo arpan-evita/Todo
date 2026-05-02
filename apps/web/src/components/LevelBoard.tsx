@@ -24,7 +24,7 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
 
   const currentLevelXp = xp % 1000;
   const progress = (currentLevelXp / 1000) * 100;
-  const completedTasks = tasks.filter(t => t.status === 'done').length;
+  const completedTasks = tasks.filter(t => t.status === 'completed').length;
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
