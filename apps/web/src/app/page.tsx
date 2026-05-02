@@ -172,7 +172,7 @@ export default function Dashboard() {
     // Check Achievements
     const { data: achievements } = await supabase.from('user_achievements').select('achievementId').eq('userId', session.user.id);
     const existingIds = (achievements || []).map(a => a.achievementId);
-    const newAchievements = checkNewAchievements({ xp: newXp, streak, completedCount: tasks.filter(t => t.status === 'done').length }, existingIds);
+    const newAchievements = checkNewAchievements({ xp: newXp, streak, completedCount: tasks.filter(t => t.status === 'completed').length }, existingIds);
     
     if (newAchievements.length > 0) {
       for (const ach of newAchievements) {
