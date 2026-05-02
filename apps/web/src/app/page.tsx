@@ -124,7 +124,7 @@ export default function Dashboard() {
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
-      .eq('userId', session.user.id)
+      .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -132,12 +132,7 @@ export default function Dashboard() {
     }
     
     if (data) {
-      const mappedTasks = data.map((t: any) => ({
-        ...t,
-        xp: t.xpReward,
-        due_date: t.deadline
-      }));
-      setTasks(mappedTasks);
+      setTasks(data);
     }
   };
 
@@ -145,7 +140,7 @@ export default function Dashboard() {
     const oldStatus = task.status;
     const { error } = await supabase.from('tasks').update({ 
       status: newStatus, 
-      completedAt: newStatus === 'completed' ? new Date().toISOString() : null 
+      completed_at: newStatus === 'completed' ? new Date().toISOString() : null 
     }).eq('id', task.id);
     
     if (!error) {
@@ -190,20 +185,23 @@ export default function Dashboard() {
         description: taskData.description,
         priority: taskData.priority,
         type: taskData.type,
-        xpReward: taskData.xp,
-        deadline: taskData.due_date,
+        xp: taskData.xp,
+        due_date: taskData.due_date,
         status: taskData.status || editingTask.status,
       }).eq('id', editingTask.id);
-      if (error) console.error('TASK_UPDATE_ERROR:', error);
+      if (error) {
+        console.error('TASK_UPDATE_ERROR:', error);
+        alert(`MISSION FAILED: ${error.message}`);
+      }
     } else {
       const { data, error } = await supabase.from('tasks').insert([{ 
         title: taskData.title,
         description: taskData.description,
         priority: taskData.priority,
         type: taskData.type,
-        xpReward: taskData.xp,
-        deadline: taskData.due_date,
-        userId: session.user.id,
+        xp: taskData.xp,
+        due_date: taskData.due_date,
+        user_id: session.user.id,
         status: 'pending'
       }]).select().single();
       
