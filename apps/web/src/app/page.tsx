@@ -183,8 +183,6 @@ export default function Dashboard() {
       const { error } = await supabase.from('tasks').update({
         title: taskData.title,
         description: taskData.description,
-        priority: taskData.priority,
-        type: taskData.type,
         xp: taskData.xp,
         due_date: taskData.due_date,
         status: taskData.status || editingTask.status,
@@ -197,8 +195,6 @@ export default function Dashboard() {
       const { data, error } = await supabase.from('tasks').insert([{ 
         title: taskData.title,
         description: taskData.description,
-        priority: taskData.priority,
-        type: taskData.type,
         xp: taskData.xp,
         due_date: taskData.due_date,
         user_id: session.user.id,
