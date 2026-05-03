@@ -90,68 +90,74 @@ export default function Dashboard() {
   }, [session]);
 
   const initialize = async () => {
-    let { data: profileData, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-    
-    if (error && (error.code === 'PGRST116' || !profileData)) {
-      console.warn('No profile found. Creating default operative profile.');
-      const { data: newProfile, error: createError } = await supabase.from('profiles').insert([{
-        id: session.user.id,
-        full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'New Operative',
-        avatar_url: session.user.user_metadata?.avatar_url || PILOT_IMG,
-        xp: 0,
-        level: 1,
-        streak: 0,
-        mode: 'Builder',
-        role: 'user',
-        last_active: new Date().toISOString(),
-        custom_modules: ['General', 'Strategy', 'Focus']
-      }]).select().single();
+    try {
+      let { data: profileData, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+      
+      if (error && (error.code === 'PGRST116' || !profileData)) {
+        console.warn('No profile found. Creating default operative profile.');
+        const { data: newProfile, error: createError } = await supabase.from('profiles').insert([{
+          id: session.user.id,
+          full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'New Operative',
+          avatar_url: session.user.user_metadata?.avatar_url || PILOT_IMG,
+          xp: 0,
+          level: 1,
+          streak: 0,
+          mode: 'Builder',
+          role: 'user',
+          last_active: new Date().toISOString(),
+          custom_modules: ['General', 'Strategy', 'Focus']
+        }]).select().single();
 
-      if (createError) {
-        console.error('CRITICAL: Failed to establish neural link (profile creation).', createError);
-        setSession(null);
-        await supabase.auth.signOut();
+        if (createError) {
+          console.error('CRITICAL: Profile creation failed.', createError);
+          // Don't sign out, just stop initialization
+          return;
+        }
+        profileData = newProfile;
+      } else if (error) {
+        console.error('FETCH_PROFILE_ERROR:', error);
+        // Don't sign out, just stop initialization
         return;
       }
-      profileData = newProfile;
-    } else if (error) {
-      console.error('UNEXPECTED_AUTH_ERROR:', error);
-      setSession(null);
-      await supabase.auth.signOut();
-      return;
-    }
-    
-    if (profileData) {
-      // Check for penalties
-      const { newStreak, penaltyXp, status } = checkStreakAndPenalties(profileData.last_active, profileData.xp || 0, profileData.streak || 0);
       
-      let finalXp = profileData.xp || 0;
-      let finalStreak = profileData.streak || 0;
+      if (profileData) {
+        // Check for penalties
+        const { newStreak, penaltyXp, status } = checkStreakAndPenalties(profileData.last_active, profileData.xp || 0, profileData.streak || 0);
+        
+        let finalXp = profileData.xp || 0;
+        let finalStreak = profileData.streak || 0;
 
-      if (status === 'broken' || status === 'reset') {
-        finalXp = Math.max(0, finalXp - penaltyXp);
-        finalStreak = newStreak;
-        await supabase.from('profiles').update({ 
-          xp: finalXp, 
-          streak: finalStreak,
-          last_active: new Date().toISOString() 
-        }).eq('id', session.user.id);
-        alert(`SYSTEM ALERT: Neural connection downtime detected. Penalty: -${penaltyXp} XP. Streak Reset.`);
+        if (status === 'broken' || status === 'reset') {
+          finalXp = Math.max(0, finalXp - penaltyXp);
+          finalStreak = newStreak;
+          await supabase.from('profiles').update({ 
+            xp: finalXp, 
+            streak: finalStreak,
+            last_active: new Date().toISOString() 
+          }).eq('id', session.user.id);
+          alert(`SYSTEM ALERT: Neural connection downtime detected. Penalty: -${penaltyXp} XP. Streak Reset.`);
+        }
+
+        setXp(finalXp);
+        setLevel(calculateLevel(finalXp));
+        setStreak(finalStreak);
+        setProfile(profileData);
+        fetchTasks();
+
+        // Check for alerts
+        const xpToNext = 1000 - (finalXp % 1000);
+        if (xpToNext < 200) addNotification(`CRITICAL: ${xpToNext} XP remaining for Identity Shift.`, 'info');
+        
+        if (profileData.last_active) {
+          const lastActiveDate = new Date(profileData.last_active);
+          if (!isNaN(lastActiveDate.getTime())) {
+            const isToday = lastActiveDate.toDateString() === new Date().toDateString();
+            if (!isToday && finalStreak > 0) addNotification("STREAK ALERT: Mission deployment required to maintain neural link.", 'warn');
+          }
+        }
       }
-
-      setXp(finalXp);
-      setLevel(calculateLevel(finalXp));
-      setStreak(finalStreak);
-      setProfile(profileData);
-      fetchTasks();
-
-      // Check for alerts
-      const xpToNext = 1000 - (finalXp % 1000);
-      if (xpToNext < 200) addNotification(`CRITICAL: ${xpToNext} XP remaining for Identity Shift.`, 'info');
-      
-      const lastActiveDate = new Date(profileData.last_active);
-      const isToday = lastActiveDate.toDateString() === new Date().toDateString();
-      if (!isToday && finalStreak > 0) addNotification("STREAK ALERT: Mission deployment required to maintain neural link.", 'warn');
+    } catch (err) {
+      console.error('INITIALIZATION_CRASH:', err);
     }
   };
 
