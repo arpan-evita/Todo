@@ -31,6 +31,7 @@ import { initNotifications, sendNotification } from '../lib/notifications';
 import { logActivity } from '../lib/activity';
 
 import TaskModal from '../components/TaskModal';
+import ProofModal from '../components/ProofModal';
 import Leaderboard from '../components/Leaderboard';
 import Reports from '../components/Reports';
 import LevelBoard from '../components/LevelBoard';
@@ -53,6 +54,8 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<any>({});
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProofModalOpen, setIsProofModalOpen] = useState(false);
+  const [taskPendingCompletion, setTaskPendingCompletion] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [activeTaskIdMenu, setActiveTaskIdMenu] = useState<string | null>(null);
@@ -136,19 +139,31 @@ export default function Dashboard() {
     }
   };
 
-  const updateTaskStatus = async (task: Task, newStatus: Status) => {
+  const updateTaskStatus = async (task: Task, newStatus: Status, proofData?: { screenshotUrl: string; videoUrl: string }) => {
     const oldStatus = task.status;
-    const { error } = await supabase.from('tasks').update({ 
+    const updatePayload: any = { 
       status: newStatus, 
       completed_at: newStatus === 'completed' ? new Date().toISOString() : null 
-    }).eq('id', task.id);
+    };
+
+    if (proofData) {
+      updatePayload.proof_screenshot_url = proofData.screenshotUrl;
+      updatePayload.proof_video_url = proofData.videoUrl;
+    }
+
+    const { error } = await supabase.from('tasks').update(updatePayload).eq('id', task.id);
     
     if (!error) {
       if (newStatus === 'completed' && oldStatus !== 'completed') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         grantXp(finalXp);
         sendNotification('MISSION ACCOMPLISHED', `Mandate "${task.title}" secured. +${finalXp} XP acquired.`);
-        logActivity(session.user.id, 'task_completed', { task_id: task.id, title: task.title, xp_earned: finalXp });
+        logActivity(session.user.id, 'task_completed', { 
+          task_id: task.id, 
+          title: task.title, 
+          xp_earned: finalXp,
+          proof: proofData 
+        });
       } else if (oldStatus === 'completed' && newStatus !== 'completed') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         grantXp(-finalXp);
@@ -321,7 +336,13 @@ export default function Dashboard() {
                                onClick={(e) => {
                                   if ((e.target as HTMLElement).closest('.task-actions')) return;
                                   const next: any = task.status === 'pending' ? 'in-progress' : task.status === 'in-progress' ? 'completed' : 'pending';
-                                  updateTaskStatus(task, next);
+                                  
+                                  if (next === 'completed') {
+                                    setTaskPendingCompletion(task);
+                                    setIsProofModalOpen(true);
+                                  } else {
+                                    updateTaskStatus(task, next);
+                                  }
                                }}
                              >
                                <div className="flex items-center space-x-5 flex-1 min-w-0">
@@ -443,6 +464,19 @@ export default function Dashboard() {
       </main>
 
       <TaskModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTask(null); }} onSave={handleSaveTask} editingTask={editingTask} modules={profile.custom_modules || ['General', 'Strategy', 'Focus']} />
+
+      <ProofModal 
+        isOpen={isProofModalOpen} 
+        onClose={() => { setIsProofModalOpen(false); setTaskPendingCompletion(null); }} 
+        onConfirm={(proofData) => {
+          if (taskPendingCompletion) {
+            updateTaskStatus(taskPendingCompletion, 'completed', proofData);
+            setIsProofModalOpen(false);
+            setTaskPendingCompletion(null);
+          }
+        }} 
+        taskTitle={taskPendingCompletion?.title || ''} 
+      />
 
       {/* STATUS BAR */}
       <motion.div initial={{ y: 50, opacity: 0, x: '-50%' }} animate={{ y: 0, opacity: 1, x: '-50%' }} className="fixed bottom-8 left-1/2 glass-panel px-10 py-4 rounded-full flex items-center space-x-12 z-50 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] transition-all hover:border-[#00f2ff]/30">

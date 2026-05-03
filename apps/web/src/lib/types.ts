@@ -16,6 +16,8 @@ export interface Task {
   link?: string;
   module?: string;
   xp: number;
+  proof_screenshot_url?: string;
+  proof_video_url?: string;
 }
 
 export interface UserProfile {
