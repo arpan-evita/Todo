@@ -97,6 +97,7 @@ export default function Dashboard() {
         console.warn('No profile found. Creating default operative profile.');
         const { data: newProfile, error: createError } = await supabase.from('profiles').insert([{
           id: session.user.id,
+          email: session.user.email,
           full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'New Operative',
           avatar_url: session.user.user_metadata?.avatar_url || PILOT_IMG,
           xp: 0,
