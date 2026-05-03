@@ -90,10 +90,32 @@ export default function Dashboard() {
   }, [session]);
 
   const initialize = async () => {
-    const { data: profileData, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+    let { data: profileData, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
     
-    if (error || !profileData) {
-      console.warn('No profile found for current session. Resetting neural link.');
+    if (error && (error.code === 'PGRST116' || !profileData)) {
+      console.warn('No profile found. Creating default operative profile.');
+      const { data: newProfile, error: createError } = await supabase.from('profiles').insert([{
+        id: session.user.id,
+        full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'New Operative',
+        avatar_url: session.user.user_metadata?.avatar_url || PILOT_IMG,
+        xp: 0,
+        level: 1,
+        streak: 0,
+        mode: 'Builder',
+        role: 'user',
+        last_active: new Date().toISOString(),
+        custom_modules: ['General', 'Strategy', 'Focus']
+      }]).select().single();
+
+      if (createError) {
+        console.error('CRITICAL: Failed to establish neural link (profile creation).', createError);
+        setSession(null);
+        await supabase.auth.signOut();
+        return;
+      }
+      profileData = newProfile;
+    } else if (error) {
+      console.error('UNEXPECTED_AUTH_ERROR:', error);
       setSession(null);
       await supabase.auth.signOut();
       return;
