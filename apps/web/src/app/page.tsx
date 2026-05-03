@@ -32,6 +32,7 @@ import { logActivity } from '../lib/activity';
 
 import TaskModal from '../components/TaskModal';
 import ProofModal from '../components/ProofModal';
+import ParentDashboard from '../components/ParentDashboard';
 import Leaderboard from '../components/Leaderboard';
 import Reports from '../components/Reports';
 import LevelBoard from '../components/LevelBoard';
@@ -46,7 +47,7 @@ const PILOT_IMG = "https://lh3.googleusercontent.com/aida-public/AB6AXuAh40g38_a
 export default function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'board' | 'levels' | 'reports' | 'profile' | 'settings'>('board');
+  const [activeTab, setActiveTab] = useState<'board' | 'levels' | 'reports' | 'profile' | 'settings' | 'parent'>('board');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
@@ -266,6 +267,7 @@ export default function Dashboard() {
         <div className="flex-1 space-y-2">
           {[
             { id: 'board', icon: LayoutGrid, label: 'Dashboard' },
+            { id: 'parent', icon: ShieldCheck, label: 'Parent Control' },
             { id: 'levels', icon: Trophy, label: 'Leaderboard' },
             { id: 'reports', icon: BarChart3, label: 'Intel Report' },
             { id: 'profile', icon: User, label: 'Profile' },
@@ -344,7 +346,6 @@ export default function Dashboard() {
                                     updateTaskStatus(task, next);
                                   }
                                }}
-                             >
                                <div className="flex items-center space-x-5 flex-1 min-w-0">
                                  <div className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-all ${task.status === 'completed' ? 'bg-green-500 border-green-500' : task.status === 'in-progress' ? 'border-yellow-500' : 'border-[#00f2ff]/30'}`}>
                                     {task.status === 'completed' && <Check size={14} className="text-black" />}
@@ -354,11 +355,13 @@ export default function Dashboard() {
                                    <div className="flex items-center space-x-2">
                                       <h4 className={`font-bold truncate ${task.status === 'completed' ? 'line-through text-slate-500' : ''}`}>{task.title}</h4>
                                       {task.link && <a href={task.link} target="_blank" rel="noreferrer" className="text-[#00f2ff] task-actions"><ExternalLink size={14} /></a>}
+                                      {task.assigned_by && <ShieldCheck size={12} className="text-[#00f2ff]" title="Parent Assigned" />}
                                    </div>
                                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-none mt-1">{task.module} • {task.type || 'DAILY'}</p>
                                    <div className="flex items-center space-x-3 mt-2">
                                       {task.description && <div className="w-1 h-1 rounded-full bg-slate-700" />}
                                       {task.image_url && <div className="w-1 h-1 rounded-full bg-purple-500" />}
+                                      {task.assigned_by && <div className="px-2 py-0.5 rounded bg-[#00f2ff]/10 text-[#00f2ff] text-[8px] font-black uppercase">Guardian Protocol</div>}
                                    </div>
                                  </div>
                                </div>
@@ -386,8 +389,9 @@ export default function Dashboard() {
               </>
             )}
 
-            {activeTab === 'levels' && <Leaderboard currentUser={{ id: session.user.id, name: profile.full_name || 'Pilot', level, xp, img: profile.avatar_url || PILOT_IMG }} />}
+             {activeTab === 'levels' && <Leaderboard currentUser={{ id: session.user.id, name: profile.full_name || 'Pilot', level, xp, img: profile.avatar_url || PILOT_IMG }} />}
             {activeTab === 'reports' && <Reports tasks={tasks} />}
+            {activeTab === 'parent' && <ParentDashboard parentProfile={profile} />}
             {activeTab === 'profile' && <LevelBoard xp={xp} level={level} streak={streak} tasks={tasks} profile={profile} onUpdate={initialize} userId={session.user.id} />}
             {activeTab === 'settings' && (
               <div className="space-y-8 pb-20">
@@ -426,7 +430,26 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="pt-8 border-t border-white/5 space-y-4">
+                   <div className="pt-8 border-t border-white/5 space-y-4">
+                      <h3 className="text-xs font-bold text-[#00f2ff] uppercase tracking-[0.2em]">IDENTITY ROLE</h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">Designate your operational status. Parents can oversee child units, assign mandates, and verify evidence.</p>
+                      <div className="flex space-x-4">
+                         {['user', 'parent'].map(r => (
+                           <button 
+                             key={r}
+                             onClick={async () => {
+                               await supabase.from('profiles').update({ role: r }).eq('id', session.user.id);
+                               initialize();
+                             }}
+                             className={`px-6 py-3 rounded-xl border-2 text-[10px] font-black uppercase tracking-widest transition-all ${profile.role === r ? 'border-[#00f2ff] bg-[#00f2ff]/10 text-[#00f2ff]' : 'border-white/5 bg-white/5 text-slate-500 hover:border-white/10'}`}
+                           >
+                             {r === 'user' ? 'Operator (Child)' : 'Guardian (Parent)'}
+                           </button>
+                         ))}
+                      </div>
+                   </div>
+
+                   <div className="pt-8 border-t border-white/5 space-y-4">
                      <h3 className="text-xs font-bold text-[#00f2ff] uppercase tracking-[0.2em]">MODULE CONFIGURATION</h3>
                      <div className="flex flex-wrap gap-2">
                         {(profile.custom_modules || []).map((m: string) => (

@@ -4,6 +4,7 @@ export type MissionType = 'daily' | 'weekly' | 'boss';
 
 export interface Task {
   id: string;
+  userId: string;
   title: string;
   description: string;
   priority: Priority;
@@ -18,6 +19,7 @@ export interface Task {
   xp: number;
   proof_screenshot_url?: string;
   proof_video_url?: string;
+  assigned_by?: string;
 }
 
 export interface UserProfile {
@@ -28,6 +30,8 @@ export interface UserProfile {
   xp: number;
   streak: number;
   mode: string;
+  role: 'user' | 'parent';
+  parent_id?: string;
   custom_modules: string[];
   social_links: any;
 }

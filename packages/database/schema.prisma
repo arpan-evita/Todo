@@ -21,6 +21,11 @@ model User {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   
+  role            String            @default("user") // user, parent
+  parentId        String?
+  parent          User?             @relation("ParentChild", fields: [parentId], references: [id])
+  children        User[]            @relation("ParentChild")
+  
   tasks           Task[]
   xpLogs          XPLog[]
   achievements    UserAchievement[]
@@ -41,6 +46,7 @@ model Task {
   status      String   @default("pending") // pending, completed
   deadline    DateTime?
   completedAt DateTime?
+  assignedBy  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
