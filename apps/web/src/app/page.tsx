@@ -357,7 +357,7 @@ export default function Dashboard() {
                                    <div className="flex items-center space-x-2">
                                       <h4 className={`font-bold truncate ${task.status === 'completed' ? 'line-through text-slate-500' : ''}`}>{task.title}</h4>
                                       {task.link && <a href={task.link} target="_blank" rel="noreferrer" className="text-[#00f2ff] task-actions"><ExternalLink size={14} /></a>}
-                                      {task.assigned_by && <ShieldCheck size={12} className="text-[#00f2ff]" title="Parent Assigned" />}
+                                      {task.assigned_by && <ShieldCheck size={12} className="text-[#00f2ff]" />}
                                    </div>
                                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-none mt-1">{task.module} • {task.type || 'DAILY'}</p>
                                    <div className="flex items-center space-x-3 mt-2">
