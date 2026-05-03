@@ -105,6 +105,33 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
     }
   };
 
+  const deleteTask = async (taskId: string) => {
+    if (!confirm('TERMINATE MISSION? This action cannot be reversed.')) return;
+    const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+    if (!error) {
+      alert('Mission Terminated.');
+      if (selectedChild) fetchChildTasks(selectedChild.id);
+    }
+  };
+
+  const updateChildTaskStatus = async (task: Task, newStatus: any) => {
+    const { error } = await supabase.from('tasks').update({ status: newStatus }).eq('id', task.id);
+    if (!error) {
+      if (selectedChild) fetchChildTasks(selectedChild.id);
+    }
+  };
+
+  const updateChildMode = async (newMode: string) => {
+    if (!selectedChild) return;
+    const { error } = await supabase.from('profiles').update({ mode: newMode }).eq('id', selectedChild.id);
+    if (!error) {
+      alert(`UNIT MODE OVERRIDE: ${newMode.toUpperCase()} MODE ACTIVE.`);
+      // Refresh local children list to show updated mode
+      fetchChildren();
+      setSelectedChild({ ...selectedChild, mode: newMode });
+    }
+  };
+
   return (
     <div className="space-y-8 pb-24">
       <div className="flex justify-between items-end px-2">
@@ -154,7 +181,7 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
                     <div className="flex items-center space-x-3 mt-1">
                       <span className="text-[9px] font-mono font-bold text-[#00f2ff] uppercase tracking-widest">LVL {child.level || 1}</span>
                       <div className="w-1 h-1 rounded-full bg-slate-700" />
-                      <span className="text-[9px] font-mono font-bold text-orange-500 uppercase tracking-widest">{child.streak || 0} DAY STREAK</span>
+                      <span className="text-[9px] font-mono font-bold text-orange-500 uppercase tracking-widest">{child.streak || 0} MODE: {child.mode}</span>
                     </div>
                   </div>
                   <TrendingUp size={16} className="text-slate-600" />
@@ -175,21 +202,33 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-8"
               >
-                {/* Stats Header */}
-                <div className="glass-panel p-8 rounded-3xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-4"><Zap className="text-[#00f2ff]/20" size={120} /></div>
-                  <div className="relative z-10 grid grid-cols-3 gap-8">
-                    <div>
-                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Total Growth</p>
-                      <p className="text-4xl font-black italic tracking-tighter text-white">{selectedChild.xp} XP</p>
+                {/* Command & Control Header */}
+                <div className="glass-panel p-8 rounded-3xl relative overflow-hidden bg-gradient-to-br from-black to-[#00f2ff]/5 border-[#00f2ff]/20">
+                  <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                    <div className="grid grid-cols-2 gap-8 flex-1">
+                      <div>
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Total Growth</p>
+                        <p className="text-4xl font-black italic tracking-tighter text-white">{selectedChild.xp} XP</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Mission Success</p>
+                        <p className="text-4xl font-black italic tracking-tighter text-[#00f2ff]">{childTasks.filter(t => t.status === 'completed').length}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Mission Success</p>
-                      <p className="text-4xl font-black italic tracking-tighter text-[#00f2ff]">{childTasks.filter(t => t.status === 'completed').length}</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Neural Status</p>
-                      <p className="text-4xl font-black italic tracking-tighter text-orange-500">ACTIVE</p>
+                    
+                    <div className="w-full md:w-auto bg-black/40 p-4 rounded-2xl border border-white/5">
+                      <p className="text-[9px] font-bold text-[#00f2ff] uppercase tracking-[0.2em] mb-3 text-center">IDENTITY MODE OVERRIDE</p>
+                      <div className="flex gap-2">
+                        {['Builder', 'Money', 'Monk', 'War'].map(m => (
+                          <button 
+                            key={m}
+                            onClick={() => updateChildMode(m)}
+                            className={`px-3 py-2 rounded-lg text-[8px] font-black uppercase tracking-tighter transition-all ${selectedChild.mode === m ? 'bg-[#00f2ff] text-black shadow-[0_0_15px_rgba(0,242,255,0.4)]' : 'bg-white/5 text-slate-500 hover:bg-white/10'}`}
+                          >
+                            {m}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -248,9 +287,15 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
                       childTasks.map(task => (
                         <div key={task.id} className="glass-panel p-5 rounded-2xl flex items-center justify-between border-transparent hover:border-white/10 transition-all group">
                           <div className="flex items-center space-x-5">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${task.status === 'completed' ? 'bg-green-500/10 text-green-500' : 'bg-slate-500/10 text-slate-500'}`}>
+                            <button 
+                              onClick={() => {
+                                const next = task.status === 'pending' ? 'in-progress' : task.status === 'in-progress' ? 'completed' : 'pending';
+                                updateChildTaskStatus(task, next);
+                              }}
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${task.status === 'completed' ? 'bg-green-500/10 text-green-500' : task.status === 'in-progress' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-slate-500/10 text-slate-500'}`}
+                            >
                               {task.status === 'completed' ? <CheckCircle2 size={18} /> : <TrendingUp size={18} />}
-                            </div>
+                            </button>
                             <div>
                               <h4 className={`font-bold text-white ${task.status === 'completed' ? 'line-through opacity-40' : ''}`}>{task.title}</h4>
                               <p className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest mt-1">
@@ -260,32 +305,21 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
                             </div>
                           </div>
                           
-                          {task.status === 'completed' && (task.proof_screenshot_url || task.proof_video_url) && (
-                            <div className="flex items-center space-x-2">
-                              {task.proof_screenshot_url && (
-                                <a 
-                                  href={task.proof_screenshot_url} 
-                                  target="_blank" 
-                                  rel="noreferrer"
-                                  className="flex items-center space-x-2 bg-[#00f2ff]/5 border border-[#00f2ff]/20 px-3 py-1.5 rounded-lg text-[9px] font-bold text-[#00f2ff] uppercase hover:bg-[#00f2ff]/10 transition-all"
-                                >
-                                  <Eye size={12} />
-                                  <span>Inspect Proof</span>
-                                </a>
-                              )}
-                              {task.proof_video_url && (
-                                <a 
-                                  href={task.proof_video_url} 
-                                  target="_blank" 
-                                  rel="noreferrer"
-                                  className="flex items-center space-x-2 bg-purple-500/5 border border-purple-500/20 px-3 py-1.5 rounded-lg text-[9px] font-bold text-purple-400 uppercase hover:bg-purple-500/10 transition-all"
-                                >
-                                  <Eye size={12} />
-                                  <span>View Video</span>
-                                </a>
-                              )}
-                            </div>
-                          )}
+                          <div className="flex items-center space-x-4">
+                            {task.status === 'completed' && (task.proof_screenshot_url || task.proof_video_url) && (
+                              <div className="flex items-center space-x-2">
+                                {task.proof_screenshot_url && (
+                                  <a href={task.proof_screenshot_url} target="_blank" rel="noreferrer" className="p-2 bg-white/5 rounded-lg text-slate-400 hover:text-[#00f2ff]"><Eye size={16} /></a>
+                                )}
+                              </div>
+                            )}
+                            <button 
+                              onClick={() => deleteTask(task.id)}
+                              className="p-2 bg-red-500/10 text-red-500/40 hover:text-red-500 transition-all rounded-lg opacity-0 group-hover:opacity-100"
+                            >
+                              <Plus size={16} className="rotate-45" />
+                            </button>
+                          </div>
                         </div>
                       ))
                     )}
