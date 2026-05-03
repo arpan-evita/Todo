@@ -346,6 +346,7 @@ export default function Dashboard() {
                                     updateTaskStatus(task, next);
                                   }
                                }}
+                             >
                                <div className="flex items-center space-x-5 flex-1 min-w-0">
                                  <div className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-all ${task.status === 'completed' ? 'bg-green-500 border-green-500' : task.status === 'in-progress' ? 'border-yellow-500' : 'border-[#00f2ff]/30'}`}>
                                     {task.status === 'completed' && <Check size={14} className="text-black" />}
