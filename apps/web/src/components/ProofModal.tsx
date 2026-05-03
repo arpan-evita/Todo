@@ -33,9 +33,9 @@ export default function ProofModal({ isOpen, onClose, onConfirm, taskTitle }: Pr
 
       const { data: { publicUrl } } = supabase.storage.from('task-images').getPublicUrl(filePath);
       setScreenshotUrl(publicUrl);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload Error:', error);
-      alert('TACTICAL UPLOAD FAILED: Verification signal lost.');
+      alert(`TACTICAL UPLOAD FAILED: ${error.message || 'Verification signal lost.'}`);
     } finally {
       setUploading(false);
     }
