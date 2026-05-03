@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Task, UserProfile } from '../lib/types';
+import ChildDetailedView from './ChildDetailedView';
 
 interface ParentDashboardProps {
   parentProfile: UserProfile;
@@ -29,6 +30,7 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
   const [childTasks, setChildTasks] = useState<Task[]>([]);
   const [isAssigning, setIsAssigning] = useState(false);
   const [childEmail, setChildEmail] = useState('');
+  const [isDetailedViewOpen, setIsDetailedViewOpen] = useState(false);
   
   // New Task State
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -216,18 +218,28 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
                       </div>
                     </div>
                     
-                    <div className="w-full md:w-auto bg-black/40 p-4 rounded-2xl border border-white/5">
-                      <p className="text-[9px] font-bold text-[#00f2ff] uppercase tracking-[0.2em] mb-3 text-center">IDENTITY MODE OVERRIDE</p>
-                      <div className="flex gap-2">
-                        {['Builder', 'Money', 'Monk', 'War'].map(m => (
-                          <button 
-                            key={m}
-                            onClick={() => updateChildMode(m)}
-                            className={`px-3 py-2 rounded-lg text-[8px] font-black uppercase tracking-tighter transition-all ${selectedChild.mode === m ? 'bg-[#00f2ff] text-black shadow-[0_0_15px_rgba(0,242,255,0.4)]' : 'bg-white/5 text-slate-500 hover:bg-white/10'}`}
-                          >
-                            {m}
-                          </button>
-                        ))}
+                    <div className="flex flex-col items-center gap-4">
+                      <button 
+                        onClick={() => setIsDetailedViewOpen(true)}
+                        className="bg-[#00f2ff]/10 text-[#00f2ff] border border-[#00f2ff]/30 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#00f2ff] hover:text-black transition-all flex items-center space-x-2"
+                      >
+                        <Eye size={16} />
+                        <span>Open Deep Surveillance</span>
+                      </button>
+                      
+                      <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                        <p className="text-[9px] font-bold text-[#00f2ff] uppercase tracking-[0.2em] mb-3 text-center">IDENTITY MODE OVERRIDE</p>
+                        <div className="flex gap-2">
+                          {['Builder', 'Money', 'Monk', 'War'].map(m => (
+                            <button 
+                              key={m}
+                              onClick={() => updateChildMode(m)}
+                              className={`px-3 py-2 rounded-lg text-[8px] font-black uppercase tracking-tighter transition-all ${selectedChild.mode === m ? 'bg-[#00f2ff] text-black shadow-[0_0_15px_rgba(0,242,255,0.4)]' : 'bg-white/5 text-slate-500 hover:bg-white/10'}`}
+                            >
+                              {m}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -336,5 +348,14 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
         </div>
       </div>
     </div>
-  );
+      <AnimatePresence>
+        {isDetailedViewOpen && selectedChild && (
+          <ChildDetailedView 
+            child={selectedChild} 
+            tasks={childTasks} 
+            onClose={() => setIsDetailedViewOpen(false)} 
+          />
+        )}
+      </AnimatePresence>
+    </div>
 }
