@@ -90,7 +90,15 @@ export default function Dashboard() {
   }, [session]);
 
   const initialize = async () => {
-    const { data: profileData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+    const { data: profileData, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+    
+    if (error || !profileData) {
+      console.warn('No profile found for current session. Resetting neural link.');
+      setSession(null);
+      await supabase.auth.signOut();
+      return;
+    }
+    
     if (profileData) {
       // Check for penalties
       const { newStreak, penaltyXp, status } = checkStreakAndPenalties(profileData.last_active, profileData.xp || 0, profileData.streak || 0);

@@ -8,7 +8,9 @@ import { Cpu, Mail, Globe, Bolt, ArrowRight, Lock, Key } from 'lucide-react';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isPasswordMode, setIsPasswordMode] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [isPasswordMode, setIsPasswordMode] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
@@ -22,19 +24,32 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     
-    if (isPasswordMode) {
-      const { error } = await supabase.auth.signInWithPassword({
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/auth/verified`
+        }
       });
       if (error) alert(error.message);
+      else alert('Deployment Authorization Sent. Please check your inbox to verify your identity.');
     } else {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: window.location.origin }
-      });
-      if (error) alert(error.message);
-      else alert('Mission intel sent to your inbox. Check for the access code.');
+      if (isPasswordMode) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) alert(error.message);
+      } else {
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: `${window.location.origin}/auth/verified` }
+        });
+        if (error) alert(error.message);
+        else alert('Mission intel sent to your inbox. Check for the access code.');
+      }
     }
     setLoading(false);
   };
@@ -51,30 +66,53 @@ export default function Login() {
         className="w-full max-w-md glass-panel p-10 rounded-3xl relative z-10 border border-white/10"
       >
         <div className="flex flex-col items-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00f2ff] to-[#7000ff] flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(0,242,255,0.3)]">
+          <motion.div 
+            animate={{ rotate: isSignUp ? 180 : 0 }}
+            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00f2ff] to-[#7000ff] flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(0,242,255,0.3)]"
+          >
             <Cpu size={32} className="text-black" />
-          </div>
-          <h1 className="text-3xl font-black italic uppercase tracking-tighter text-center">
+          </motion.div>
+          <h1 className="text-3xl font-black italic uppercase tracking-tighter text-center leading-none">
             AUTOGROWX:<br />MISSION CONTROL
           </h1>
-          <p className="text-[10px] font-mono font-bold text-[#00f2ff] uppercase tracking-[0.3em] mt-4">Initialize Neural Link</p>
+          <p className="text-[10px] font-mono font-bold text-[#00f2ff] uppercase tracking-[0.3em] mt-4">
+            {isSignUp ? 'Establish New Identity' : 'Initialize Neural Link'}
+          </p>
         </div>
 
         <div className="space-y-4">
-          <button 
-            onClick={handleGoogleLogin}
-            className="w-full h-14 bg-white text-black font-black uppercase text-xs tracking-widest rounded-xl flex items-center justify-center space-x-3 hover:bg-slate-200 transition-all active:scale-95"
-          >
-            <Globe size={20} />
-            <span>Sync with Google Intelligence</span>
-          </button>
+          {!isSignUp && (
+            <>
+              <button 
+                onClick={handleGoogleLogin}
+                className="w-full h-14 bg-white text-black font-black uppercase text-xs tracking-widest rounded-xl flex items-center justify-center space-x-3 hover:bg-slate-200 transition-all active:scale-95"
+              >
+                <Globe size={20} />
+                <span>Sync with Google Intelligence</span>
+              </button>
 
-          <div className="relative py-4">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
-            <div className="relative flex justify-center text-[10px] uppercase font-bold text-slate-500 bg-[#050508] px-4">OR SECURE TERMINAL</div>
-          </div>
+              <div className="relative py-4">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
+                <div className="relative flex justify-center text-[10px] uppercase font-bold text-slate-500 bg-[#050508] px-4">OR SECURE TERMINAL</div>
+              </div>
+            </>
+          )}
 
           <form onSubmit={handleAuth} className="space-y-4">
+            {isSignUp && (
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-[#00f2ff] transition-colors" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="OPERATIVE FULL NAME..." 
+                  className="w-full h-14 bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 text-xs font-mono font-bold tracking-widest outline-none focus:border-[#00f2ff]/50 transition-all placeholder:text-slate-600"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-[#00f2ff] transition-colors" size={18} />
               <input 
@@ -87,7 +125,7 @@ export default function Login() {
               />
             </div>
 
-            {isPasswordMode && (
+            {(isPasswordMode || isSignUp) && (
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -101,6 +139,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  minLength={6}
                 />
               </motion.div>
             )}
@@ -113,19 +152,31 @@ export default function Login() {
                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>{isPasswordMode ? 'Authorize Access' : 'Deploy OTP'}</span>
+                  <span>{isSignUp ? 'Create Operative Profile' : isPasswordMode ? 'Authorize Access' : 'Deploy OTP'}</span>
                   <ArrowRight size={18} />
                 </>
               )}
             </button>
             
-            <button
-              type="button"
-              onClick={() => setIsPasswordMode(!isPasswordMode)}
-              className="w-full text-center text-[10px] font-bold text-slate-500 hover:text-[#00f2ff] transition-colors uppercase tracking-widest"
-            >
-              {isPasswordMode ? 'Switch to Magic Link' : 'Use Password Instead'}
-            </button>
+            <div className="flex flex-col space-y-4 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-center text-[10px] font-bold text-[#00f2ff] hover:brightness-125 transition-all uppercase tracking-[0.2em]"
+              >
+                {isSignUp ? 'Already have clearance? Log In' : 'New Operative? Establish Identity'}
+              </button>
+
+              {!isSignUp && (
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordMode(!isPasswordMode)}
+                  className="text-center text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest"
+                >
+                  {isPasswordMode ? 'Switch to Magic Link' : 'Use Password Instead'}
+                </button>
+              )}
+            </div>
           </form>
         </div>
 
