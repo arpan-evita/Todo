@@ -345,9 +345,9 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
               </div>
             )}
           </AnimatePresence>
-        </div>
+          </div>
       </div>
-    </div>
+
       <AnimatePresence>
         {isDetailedViewOpen && selectedChild && (
           <ChildDetailedView 
@@ -358,4 +358,5 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
         )}
       </AnimatePresence>
     </div>
+  );
 }
