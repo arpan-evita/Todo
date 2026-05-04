@@ -137,11 +137,12 @@ export default function AICoach({ userId }: { userId: string }) {
     setChat(prev => [...prev, { role: 'user', text: command }]);
     setMessage('');
     
-    // 1. Detect Intent from keywords
+    // 1. Fetch data for detection
+    const { data: pendingTasks } = await supabase.from('tasks').select('*').eq('user_id', userId).eq('status', 'pending');
     let intent: AIIntent = 'general';
     const lower = command.toLowerCase();
     
-    // Check for Agent Action first
+    // 2. Detect Agent Action
     const agentAction = detectAgentAction(command, pendingTasks || []);
     if (agentAction) {
       intent = 'execute';
@@ -169,14 +170,13 @@ export default function AICoach({ userId }: { userId: string }) {
     else if (lower.includes('teach') || lower.includes('knowledge') || lower.includes('concept')) intent = 'knowledge';
     else if (lower.includes('analyze') || lower.includes('pattern') || lower.includes('deep')) intent = 'deep_analysis';
 
-    // 2. Detect state
+    // 3. Detect state
     const currentState = await updateState(command);
 
-    // 3. Fetch data for response
+    // 4. Fetch profile data
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    const { data: pendingTasks } = await supabase.from('tasks').select('*').eq('user_id', userId).eq('status', 'pending');
 
-    // 4. Generate response
+    // 5. Generate response
     const coaching = await generateIntelligentResponse(intent, currentState, {
       xp: profile?.xp || 0,
       streak: profile?.streak || 0,
