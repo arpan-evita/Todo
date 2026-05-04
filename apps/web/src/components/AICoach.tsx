@@ -19,6 +19,14 @@ export default function AICoach({ userId }: { userId: string }) {
   const [briefing, setBriefing] = useState<string>('');
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -210,9 +218,9 @@ export default function AICoach({ userId }: { userId: string }) {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-8 w-16 h-16 rounded-full bg-gradient-to-br from-[#00f2ff] to-[#7000ff] flex items-center justify-center shadow-[0_0_30px_rgba(0,242,255,0.4)] z-[100]"
+        className="fixed bottom-20 lg:bottom-24 right-4 lg:right-8 w-14 h-14 lg:w-16 lg:h-16 rounded-full bg-gradient-to-br from-[#00f2ff] to-[#7000ff] flex items-center justify-center shadow-[0_0_30px_rgba(0,242,255,0.4)] z-[100]"
       >
-        <Bot size={32} className="text-black" />
+        <Bot size={isMobile ? 24 : 32} className="text-black" />
       </motion.button>
 
       <AnimatePresence>
@@ -221,7 +229,7 @@ export default function AICoach({ userId }: { userId: string }) {
             initial={{ opacity: 0, y: 100, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className="fixed bottom-32 right-8 w-96 h-[500px] glass-panel-active rounded-3xl z-[101] flex flex-col shadow-2xl border border-[#00f2ff]/30 overflow-hidden"
+            className="fixed bottom-16 lg:bottom-32 right-0 lg:right-8 w-full lg:w-96 h-[calc(100vh-120px)] lg:h-[600px] max-h-[800px] glass-panel-active rounded-t-3xl lg:rounded-3xl z-[101] flex flex-col shadow-2xl border border-[#00f2ff]/30 overflow-hidden"
           >
             {/* Header */}
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40">
