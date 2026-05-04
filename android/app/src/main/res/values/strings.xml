@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">AutogrowX</string>
-    <string name="title_activity_main">AutogrowX</string>
+    <string name="app_name">AutogrowX Todo</string>
+    <string name="title_activity_main">AutogrowX Todo</string>
     <string name="package_name">com.arpan.todo</string>
     <string name="custom_url_scheme">com.arpan.todo</string>
 </resources>

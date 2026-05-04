@@ -306,7 +306,7 @@ export default function Dashboard() {
       {/* HEADER */}
       <header className="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center h-16 px-4 md:px-8">
         <div className="text-sm md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f2ff] to-[#7000ff] tracking-tighter uppercase italic truncate mr-2">
-          {isMobile ? 'AGX: MISSION' : 'AUTOGROWX: MISSION CONTROL'}
+          {isMobile ? 'AUTOGROWX: TODO' : 'AUTOGROWX: TODO CONTROL'}
         </div>
         <div className="flex items-center space-x-3 md:space-x-6">
           <div className="hidden lg:flex items-center bg-white/5 border border-white/10 rounded-lg px-4 py-2 w-96 group hover:border-[#00f2ff]/50 transition-all">

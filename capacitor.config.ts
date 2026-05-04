@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.arpan.todo',
-  appName: 'AutogrowX',
+  appName: 'AutogrowX Todo',
   webDir: 'dist'
 };
 
