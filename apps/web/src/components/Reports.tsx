@@ -45,8 +45,8 @@ export default function Reports({ tasks }: ReportsProps) {
   return (
     <div className="space-y-8 pb-20">
       <div className="px-2">
-        <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">INTEL REPORT</h2>
-        <p className="text-[11px] font-bold text-slate-500 mt-2 uppercase tracking-widest">Sector Performance Analytics</p>
+        <h2 className="text-2xl md:text-4xl font-black italic tracking-tighter uppercase leading-none">INTEL REPORT</h2>
+        <p className="text-[9px] md:text-[11px] font-bold text-slate-500 mt-2 uppercase tracking-widest">Sector Performance Analytics</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -128,11 +128,11 @@ export default function Reports({ tasks }: ReportsProps) {
           { label: 'AVG BOUNTY', value: `${Math.round(completedTasks.reduce((a, b) => a + (b.xp || 150), 0) / (completedTasks.length || 1))} XP`, icon: Zap, color: 'text-purple-500' },
           { label: 'THROUGHPUT', value: completedTasks.length, icon: BarChart3, color: 'text-green-500' }
         ].map((stat, i) => (
-          <motion.div key={i} whileHover={{ y: -5 }} className="glass-panel p-6 rounded-xl flex items-center space-x-6">
-            <div className={`p-4 rounded-lg bg-white/5 ${stat.color}`}><stat.icon size={24} /></div>
+          <motion.div key={i} whileHover={{ y: -5 }} className="glass-panel p-4 md:p-6 rounded-xl flex items-center space-x-4 md:space-x-6">
+            <div className={`p-3 md:p-4 rounded-lg bg-white/5 ${stat.color}`}><stat.icon size={20} /></div>
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
-              <p className="text-2xl font-black">{stat.value}</p>
+              <p className="text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+              <p className="text-lg md:text-2xl font-black">{stat.value}</p>
             </div>
           </motion.div>
         ))}

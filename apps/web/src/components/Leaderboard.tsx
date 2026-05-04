@@ -64,8 +64,8 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
   return (
     <div className="space-y-8 pb-20">
       <div className="px-2">
-        <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">RANKINGS</h2>
-        <p className="text-[11px] font-bold text-slate-500 mt-2 uppercase tracking-widest">Global Operative Standing</p>
+        <h2 className="text-2xl md:text-4xl font-black italic tracking-tighter uppercase leading-none">RANKINGS</h2>
+        <p className="text-[9px] md:text-[11px] font-bold text-slate-500 mt-2 uppercase tracking-widest">Global Operative Standing</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -86,9 +86,9 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
               transition={{ delay: index * 0.1 }}
               className={`glass-panel p-5 rounded-2xl flex items-center justify-between group hover:border-[#00f2ff]/30 transition-all ${leader.rank <= 3 ? 'border-l-4 border-l-[#00f2ff]' : ''} ${leader.id === currentUser.id ? 'bg-[#00f2ff]/5 border-[#00f2ff]/30' : ''}`}
             >
-              <div className="flex items-center space-x-6">
-                <div className="w-8 text-center text-xl font-black italic text-slate-700 group-hover:text-[#00f2ff] transition-colors">{leader.rank}</div>
-                <div className="w-12 h-12 rounded-full border border-white/10 overflow-hidden shrink-0">
+              <div className="flex items-center space-x-3 md:space-x-6 shrink-0">
+                <div className="w-6 md:w-8 text-center text-sm md:text-xl font-black italic text-slate-700 group-hover:text-[#00f2ff] transition-colors">{leader.rank}</div>
+                <div className="w-8 h-8 md:w-12 md:h-12 rounded-full border border-white/10 overflow-hidden shrink-0">
                    <img src={leader.avatar_url || 'https://lh3.googleusercontent.com/a/default-user'} className="w-full h-full object-cover" alt="Operative" />
                 </div>
                 <div>

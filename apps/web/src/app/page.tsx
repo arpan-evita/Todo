@@ -65,6 +65,14 @@ export default function Dashboard() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [filterModule, setFilterModule] = useState('All');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const addNotification = (msg: string, type: 'info' | 'warn' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -294,12 +302,14 @@ export default function Dashboard() {
   if (!session) return <Login />;
 
   return (
-    <div className="min-h-screen bg-[#050508] text-white font-sans selection:bg-[#00f2ff]/30">
+    <div className="min-h-screen bg-[#050508] text-white font-sans selection:bg-[#00f2ff]/30 overflow-x-hidden">
       {/* HEADER */}
-      <header className="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center h-16 px-8">
-        <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f2ff] to-[#7000ff] tracking-tighter uppercase italic">AUTOGROWX: MISSION CONTROL</div>
-        <div className="flex items-center space-x-6">
-          <div className="hidden md:flex items-center bg-white/5 border border-white/10 rounded-lg px-4 py-2 w-96 group hover:border-[#00f2ff]/50 transition-all">
+      <header className="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center h-16 px-4 md:px-8">
+        <div className="text-sm md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f2ff] to-[#7000ff] tracking-tighter uppercase italic truncate mr-2">
+          {isMobile ? 'AGX: MISSION' : 'AUTOGROWX: MISSION CONTROL'}
+        </div>
+        <div className="flex items-center space-x-3 md:space-x-6">
+          <div className="hidden lg:flex items-center bg-white/5 border border-white/10 rounded-lg px-4 py-2 w-96 group hover:border-[#00f2ff]/50 transition-all">
             <Search className="w-4 h-4 text-slate-400 mr-2 group-hover:text-[#00f2ff]" />
             <input 
               placeholder="QUERY MISSION DATABASE..." 
@@ -308,42 +318,66 @@ export default function Dashboard() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className="text-slate-400 hover:text-[#00f2ff] relative"><Bell size={20} /><span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" /></button>
-          <div className="w-10 h-10 rounded-full border border-[#00f2ff]/50 overflow-hidden hover:ring-2 hover:ring-[#00f2ff]/50 cursor-pointer" onClick={() => setActiveTab('profile')}>
+          <button className="text-slate-400 hover:text-[#00f2ff] relative p-1"><Bell size={18} /><span className="absolute top-1 right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" /></button>
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border border-[#00f2ff]/50 overflow-hidden hover:ring-2 hover:ring-[#00f2ff]/50 cursor-pointer" onClick={() => setActiveTab('profile')}>
             <img src={profile.avatar_url || PILOT_IMG} className="w-full h-full object-cover" alt="Profile" />
           </div>
         </div>
       </header>
 
-      {/* SIDEBAR */}
-      <nav 
-        className={`fixed left-0 top-16 h-[calc(100vh-64px)] z-40 bg-black/80 backdrop-blur-2xl border-r border-[#00f2ff]/10 transition-all duration-500 flex flex-col py-6 ${isSidebarHovered ? 'w-64' : 'w-20'}`}
-        onMouseEnter={() => setIsSidebarHovered(true)} onMouseLeave={() => setIsSidebarHovered(false)}
-      >
-        <div className="px-6 mb-8 flex items-center space-x-4">
-           <div className="w-10 h-10 rounded bg-gradient-to-br from-[#00f2ff] to-[#7000ff] flex items-center justify-center shrink-0"><Cpu size={20} className="text-black" /></div>
-           {isSidebarHovered && <div><p className="text-[10px] font-mono font-bold text-[#00f2ff] uppercase tracking-widest leading-none mb-1">COMMANDER</p><p className="text-xs font-bold uppercase">{getIdentity(level)}</p></div>}
-        </div>
-        <div className="flex-1 space-y-2">
+      {/* SIDEBAR (Desktop) */}
+      {!isMobile && (
+        <nav 
+          className={`fixed left-0 top-16 h-[calc(100vh-64px)] z-40 bg-black/80 backdrop-blur-2xl border-r border-[#00f2ff]/10 transition-all duration-500 flex flex-col py-6 ${isSidebarHovered ? 'w-64' : 'w-20'}`}
+          onMouseEnter={() => setIsSidebarHovered(true)} onMouseLeave={() => setIsSidebarHovered(false)}
+        >
+          <div className="px-6 mb-8 flex items-center space-x-4">
+             <div className="w-10 h-10 rounded bg-gradient-to-br from-[#00f2ff] to-[#7000ff] flex items-center justify-center shrink-0"><Cpu size={20} className="text-black" /></div>
+             {isSidebarHovered && <div><p className="text-[10px] font-mono font-bold text-[#00f2ff] uppercase tracking-widest leading-none mb-1">COMMANDER</p><p className="text-xs font-bold uppercase">{getIdentity(level)}</p></div>}
+          </div>
+          <div className="flex-1 space-y-2">
+            {[
+              { id: 'board', icon: LayoutGrid, label: 'Dashboard' },
+              { id: 'parent', icon: ShieldCheck, label: 'Parent Control' },
+              { id: 'levels', icon: Trophy, label: 'Leaderboard' },
+              { id: 'reports', icon: BarChart3, label: 'Intel Report' },
+              { id: 'profile', icon: User, label: 'Profile' },
+              { id: 'settings', icon: Settings, label: 'Settings' },
+            ].map(item => (
+              <div key={item.id} onClick={() => setActiveTab(item.id as any)} className={`flex items-center h-12 px-6 cursor-pointer transition-all relative ${activeTab === item.id ? 'text-[#00f2ff] border-l-4 border-[#00f2ff] bg-[#00f2ff]/10' : 'text-slate-500 hover:bg-white/10'}`}>
+                <item.icon size={24} className="shrink-0" />
+                {isSidebarHovered && <span className="ml-4 text-[11px] font-bold uppercase tracking-widest">{item.label}</span>}
+              </div>
+            ))}
+          </div>
+          <div className="px-6 py-4" onClick={() => supabase.auth.signOut()}><Power size={24} className="text-slate-600 hover:text-red-500 cursor-pointer transition-colors" /></div>
+        </nav>
+      )}
+
+      {/* BOTTOM NAV (Mobile) */}
+      {isMobile && (
+        <nav className="fixed bottom-0 left-0 w-full bg-black/90 backdrop-blur-2xl border-t border-white/10 z-[100] h-16 flex items-center justify-around px-2">
           {[
-            { id: 'board', icon: LayoutGrid, label: 'Dashboard' },
-            { id: 'parent', icon: ShieldCheck, label: 'Parent Control' },
-            { id: 'levels', icon: Trophy, label: 'Leaderboard' },
-            { id: 'reports', icon: BarChart3, label: 'Intel Report' },
+            { id: 'board', icon: LayoutGrid, label: 'Missions' },
+            { id: 'levels', icon: Trophy, label: 'Rankings' },
+            { id: 'reports', icon: BarChart3, label: 'Intel' },
             { id: 'profile', icon: User, label: 'Profile' },
-            { id: 'settings', icon: Settings, label: 'Settings' },
+            { id: 'settings', icon: Settings, label: 'Core' },
           ].map(item => (
-            <div key={item.id} onClick={() => setActiveTab(item.id as any)} className={`flex items-center h-12 px-6 cursor-pointer transition-all relative ${activeTab === item.id ? 'text-[#00f2ff] border-l-4 border-[#00f2ff] bg-[#00f2ff]/10' : 'text-slate-500 hover:bg-white/10'}`}>
-              <item.icon size={24} className="shrink-0" />
-              {isSidebarHovered && <span className="ml-4 text-[11px] font-bold uppercase tracking-widest">{item.label}</span>}
-            </div>
+            <button 
+              key={item.id} 
+              onClick={() => setActiveTab(item.id as any)}
+              className={`flex flex-col items-center justify-center space-y-1 transition-all ${activeTab === item.id ? 'text-[#00f2ff]' : 'text-slate-500'}`}
+            >
+              <item.icon size={20} />
+              <span className="text-[8px] font-black uppercase tracking-tighter">{item.label}</span>
+            </button>
           ))}
-        </div>
-        <div className="px-6 py-4" onClick={() => supabase.auth.signOut()}><Power size={24} className="text-slate-600 hover:text-red-500 cursor-pointer transition-colors" /></div>
-      </nav>
+        </nav>
+      )}
 
       {/* MAIN CONTENT */}
-      <main className="ml-20 pt-24 px-8 pb-32 min-h-screen">
+      <main className={`${isMobile ? 'pt-20 px-4' : 'ml-20 pt-24 px-8'} pb-32 min-h-screen`}>
         <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-8 space-y-8">
             {activeTab === 'board' && (
@@ -490,8 +524,8 @@ export default function Dashboard() {
             {activeTab === 'settings' && (
               <div className="space-y-8 pb-20">
                 <div className="px-2">
-                  <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">CORE SETTINGS</h2>
-                  <p className="text-[11px] font-bold text-slate-500 mt-2 uppercase tracking-widest">System Configuration & Identity Modes</p>
+                  <h2 className="text-2xl md:text-4xl font-black italic tracking-tighter uppercase leading-none">CORE SETTINGS</h2>
+                  <p className="text-[9px] md:text-[11px] font-bold text-slate-500 mt-2 uppercase tracking-widest">System Configuration & Identity Modes</p>
                 </div>
                 
                 <div className="glass-panel p-8 rounded-2xl space-y-8">
@@ -563,8 +597,8 @@ export default function Dashboard() {
                 <div className="absolute inset-0 bg-gradient-to-t from-orange-500/10 to-transparent opacity-50" />
                 <div className="relative z-10">
                   <div className="w-24 h-24 mb-6 flex items-center justify-center relative"><div className="absolute inset-0 bg-orange-500/20 blur-3xl animate-pulse" /><Flame size={64} className="text-orange-500 fill-orange-500" /></div>
-                  <h3 className="text-6xl font-black tracking-tighter mb-1">{streak}</h3>
-                  <p className="text-orange-400 text-[10px] font-bold tracking-[0.3em] uppercase mb-4">DAY STREAK ACTIVE</p>
+                  <h3 className="text-4xl md:text-6xl font-black tracking-tighter mb-1">{streak}</h3>
+                  <p className="text-orange-400 text-[8px] md:text-[10px] font-bold tracking-[0.3em] uppercase mb-4">DAY STREAK ACTIVE</p>
                   <p className="text-slate-500 text-[9px] leading-relaxed italic max-w-[200px]">"Maintain operational consistency for 6 more cycles to unlock the Eternal Flame module."</p>
                 </div>
              </motion.section>
@@ -596,11 +630,13 @@ export default function Dashboard() {
       />
 
       {/* STATUS BAR */}
-      <motion.div initial={{ y: 50, opacity: 0, x: '-50%' }} animate={{ y: 0, opacity: 1, x: '-50%' }} className="fixed bottom-8 left-1/2 glass-panel px-10 py-4 rounded-full flex items-center space-x-12 z-50 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] transition-all hover:border-[#00f2ff]/30">
-        <div className="flex items-center space-x-3"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.6)]" /><span className="text-[9px] font-mono font-bold text-slate-400 tracking-[0.2em] uppercase">ENCRYPTION: ACTIVE</span></div>
-        <div className="flex items-center space-x-3"><Bolt size={14} className="text-[#00f2ff]" /><span className="text-[9px] font-mono font-bold text-slate-400 tracking-[0.2em] uppercase">SYNC: 100%</span></div>
-        <div className="flex items-center space-x-3"><Cloud size={14} className="text-purple-400" /><span className="text-[9px] font-mono font-bold text-slate-400 tracking-[0.2em] uppercase">NEURAL: STABLE</span></div>
-      </motion.div>
+      {!isMobile && (
+        <motion.div initial={{ y: 50, opacity: 0, x: '-50%' }} animate={{ y: 0, opacity: 1, x: '-50%' }} className="fixed bottom-8 left-1/2 glass-panel px-10 py-4 rounded-full flex items-center space-x-12 z-50 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] transition-all hover:border-[#00f2ff]/30">
+          <div className="flex items-center space-x-3"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.6)]" /><span className="text-[9px] font-mono font-bold text-slate-400 tracking-[0.2em] uppercase">ENCRYPTION: ACTIVE</span></div>
+          <div className="flex items-center space-x-3"><Bolt size={14} className="text-[#00f2ff]" /><span className="text-[9px] font-mono font-bold text-slate-400 tracking-[0.2em] uppercase">SYNC: 100%</span></div>
+          <div className="flex items-center space-x-3"><Cloud size={14} className="text-purple-400" /><span className="text-[9px] font-mono font-bold text-slate-400 tracking-[0.2em] uppercase">NEURAL: STABLE</span></div>
+        </motion.div>
+      )}
       {/* NOTIFICATIONS */}
       <div className="fixed top-20 right-8 z-[100] space-y-3 pointer-events-none">
         <AnimatePresence>
