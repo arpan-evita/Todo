@@ -47,6 +47,9 @@ model Task {
   deadline    DateTime?
   completedAt DateTime?
   assignedBy  String?
+  module      String?
+  mode        String?
+  assigned_role String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
