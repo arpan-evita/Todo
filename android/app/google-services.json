@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "910055426339",
+    "project_id": "autogrowx-todo",
+    "storage_bucket": "autogrowx-todo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:910055426339:android:43659ba7d15079a43f6496",
+        "android_client_info": {
+          "package_name": "com.arpan.todo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnYp6dIuUcNuvME5_u0sWflLI-x-rdVbc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

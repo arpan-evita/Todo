@@ -16,14 +16,12 @@ export const initNotifications = async () => {
       const permStatus = await LocalNotifications.requestPermissions();
       if (permStatus.display === 'granted') {
         // Also register for push if on native
-        /* 
         try {
           await PushNotifications.requestPermissions();
           await PushNotifications.register();
         } catch (pushErr) {
           console.warn('Push registration failed, continuing with local only:', pushErr);
         }
-        */
         return true;
       }
       return false;
