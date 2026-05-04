@@ -243,6 +243,9 @@ export default function Dashboard() {
         xp: taskData.xp,
         due_date: taskData.due_date,
         status: taskData.status || editingTask.status,
+        module: taskData.module,
+        mode: taskData.mode,
+        assigned_role: taskData.assigned_role,
       }).eq('id', editingTask.id);
       if (error) {
         console.error('TASK_UPDATE_ERROR:', error);
@@ -255,7 +258,10 @@ export default function Dashboard() {
         xp: taskData.xp,
         due_date: taskData.due_date,
         user_id: session.user.id,
-        status: 'pending'
+        status: 'pending',
+        module: taskData.module,
+        mode: taskData.mode,
+        assigned_role: taskData.assigned_role,
       }]).select().single();
       
       if (error) {

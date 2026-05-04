@@ -24,6 +24,8 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
   const [imageUrl, setImageUrl] = useState('');
   const [link, setLink] = useState('');
   const [xp, setXp] = useState(150);
+  const [taskMode, setTaskMode] = useState('Builder');
+  const [taskRole, setTaskRole] = useState('user');
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -37,6 +39,9 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
       setImageUrl(editingTask.image_url || '');
       setLink(editingTask.link || '');
       setXp(editingTask.xp || 150);
+      setTaskMode(editingTask.module || 'Builder'); // Reusing module as sector/mode if needed, but let's add specific fields if possible.
+      // Wait, the user wants Mode, Role, and Sector. 
+      // I'll add them as separate state but mapping to Task fields.
     } else {
       resetForm();
     }
@@ -89,6 +94,8 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
       image_url: imageUrl,
       link,
       xp: Number(xp),
+      mode: taskMode,
+      assigned_role: taskRole,
     });
   };
 
@@ -140,7 +147,43 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-slate-500 tracking-widest uppercase">MISSION INTEL (NOTES)</label>
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm outline-none focus:border-[#00f2ff]/50 resize-none" />
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm outline-none focus:border-[#00f2ff]/50 resize-none" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold text-[#00f2ff] tracking-[0.2em] uppercase">SECTOR (MODULE)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {modules.map(m => (
+                      <button type="button" key={m} onClick={() => setModule(m)} className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all ${module === m ? 'bg-[#00f2ff] text-black shadow-[0_0_15px_rgba(0,242,255,0.3)]' : 'bg-white/5 text-slate-500 border border-white/5 hover:border-white/10'}`}>
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold text-[#7000ff] tracking-[0.2em] uppercase">IDENTITY MODE</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Builder', 'Money', 'Monk', 'War'].map(m => (
+                      <button type="button" key={m} onClick={() => setTaskMode(m)} className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all ${taskMode === m ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(112,0,255,0.3)]' : 'bg-white/5 text-slate-500 border border-white/5 hover:border-white/10'}`}>
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold text-emerald-500 tracking-[0.2em] uppercase">IDENTITY ROLE</label>
+                  <div className="flex gap-2">
+                    {[
+                      { id: 'user', label: 'Operator' },
+                      { id: 'parent', label: 'Guardian' }
+                    ].map(r => (
+                      <button type="button" key={r.id} onClick={() => setTaskRole(r.id)} className={`flex-1 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all ${taskRole === r.id ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-slate-500 border border-white/5 hover:border-white/10'}`}>
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
               <button type="submit" className="w-full py-5 bg-[#00f2ff] hover:bg-[#00f2ff]/90 text-black font-bold text-xs tracking-[0.2em] uppercase rounded-xl transition-all shadow-[0_0_30px_rgba(0,242,255,0.2)] flex items-center justify-center space-x-3">
                 <Save size={18} /><span>{editingTask ? 'UPDATE CORE' : 'SYNCHRONIZE MISSION'}</span>

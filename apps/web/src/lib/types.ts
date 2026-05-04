@@ -20,6 +20,8 @@ export interface Task {
   proof_screenshot_url?: string;
   proof_video_url?: string;
   assigned_by?: string;
+  mode?: string;
+  assigned_role?: string;
 }
 
 export interface UserProfile {
