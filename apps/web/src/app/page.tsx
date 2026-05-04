@@ -305,8 +305,13 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[#050508] text-white font-sans selection:bg-[#00f2ff]/30 overflow-x-hidden">
       {/* HEADER */}
       <header className="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center h-16 px-4 md:px-8">
-        <div className="text-sm md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f2ff] to-[#7000ff] tracking-tighter uppercase italic truncate mr-2">
-          {isMobile ? 'AUTOGROWX: TODO' : 'AUTOGROWX: TODO CONTROL'}
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg overflow-hidden border border-white/10 shrink-0">
+            <img src="/logo.png" className="w-full h-full object-cover" alt="Logo" />
+          </div>
+          <div className="text-sm md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f2ff] to-[#7000ff] tracking-tighter uppercase italic truncate">
+            {isMobile ? 'AGX: TODO' : 'AUTOGROWX: TODO CONTROL'}
+          </div>
         </div>
         <div className="flex items-center space-x-3 md:space-x-6">
           <div className="hidden lg:flex items-center bg-white/5 border border-white/10 rounded-lg px-4 py-2 w-96 group hover:border-[#00f2ff]/50 transition-all">
