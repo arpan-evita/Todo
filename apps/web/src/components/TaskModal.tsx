@@ -39,9 +39,8 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
       setImageUrl(editingTask.image_url || '');
       setLink(editingTask.link || '');
       setXp(editingTask.xp || 150);
-      setTaskMode(editingTask.module || 'Builder'); // Reusing module as sector/mode if needed, but let's add specific fields if possible.
-      // Wait, the user wants Mode, Role, and Sector. 
-      // I'll add them as separate state but mapping to Task fields.
+      setTaskMode(editingTask.mode || 'Builder');
+      setTaskRole(editingTask.assigned_role || 'user');
     } else {
       resetForm();
     }
@@ -57,6 +56,8 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
     setImageUrl('');
     setLink('');
     setXp(150);
+    setTaskMode('Builder');
+    setTaskRole('user');
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
