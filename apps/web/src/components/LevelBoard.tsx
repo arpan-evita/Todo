@@ -129,7 +129,7 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
 function Badge({ icon, label, detail, active, color }: any) {
   return (
     <div className={`glass-panel p-4 md:p-5 flex items-center gap-4 md:gap-6 transition-all ${active ? 'opacity-100' : 'opacity-30 grayscale'}`} style={{ borderLeft: active ? `4px solid ${color}` : '4px solid #222' }}>
-      <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-zinc-900 flex items-center justify-center border border-white/10 shrink-0" style={{ color: active ? color : '#666' }}>{React.cloneElement(icon, { size: isMobile ? 20 : 28 })}</div>
+      <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-zinc-900 flex items-center justify-center border border-white/10 shrink-0" style={{ color: active ? color : '#666' }}>{React.cloneElement(icon, { size: 22 })}</div>
       <div><span className="text-xs md:text-sm font-black uppercase tracking-widest text-white block leading-none mb-1 truncate max-w-[120px]">{label}</span><span className="text-[8px] md:text-[10px] text-slate-500 uppercase font-bold tracking-tight">{detail}</span></div>
     </div>
   );
