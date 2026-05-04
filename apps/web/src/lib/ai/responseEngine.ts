@@ -8,7 +8,7 @@ export interface CoachingResponse {
   tone: string;
 }
 
-export type AIIntent = 'general' | 'plan' | 'strategy' | 'motivation' | 'knowledge';
+export type AIIntent = 'general' | 'plan' | 'strategy' | 'motivation' | 'knowledge' | 'deep_analysis';
 
 const TONE_MAP: Record<OperativeState, any> = {
   driven: {
@@ -118,6 +118,26 @@ export const generateIntelligentResponse = async (
       insight = `${model.name}: ${model.description}`;
       action = `Productivity Tip: ${model.tip}`;
       urgency = "Knowledge is power, but only if you use it. Don't be a library with no readers.";
+      break;
+
+    case 'deep_analysis':
+      tone = "QUANTUM ANALYST";
+      const completed = data.pendingTasks.filter(t => t.status === 'completed');
+      const highPriority = data.pendingTasks.filter(t => t.status === 'pending' && t.priority === 'high');
+      
+      if (highPriority.length > 3) {
+        insight = `Analysis complete: Critical bottleneck detected. You have ${highPriority.length} high-priority mandates pending.`;
+        action = "Initiate 'Priority Flush'—focus exclusively on your high-value targets for the next 90 minutes.";
+        urgency = "Tactical overload risk is high. Clear the deck now.";
+      } else if (data.streak > 7) {
+        insight = `Sustained excellence detected. Your ${data.streak}-day streak puts you in the top 5% of operators.`;
+        action = "You're ready for an Ascension Mission. Create a 'Boss' level task that scares you a little.";
+        urgency = "Don't get comfortable. Growth happens at the edges.";
+      } else {
+        insight = "Behavioral patterns show a steady climb. Your XP growth is consistent.";
+        action = "Increase your daily XP target by 15% to maintain upward pressure on your limits.";
+        urgency = "Optimization is a continuous process.";
+      }
       break;
 
     case 'general':

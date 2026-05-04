@@ -14,11 +14,14 @@ import {
   Eye, 
   ShieldCheck,
   Zap,
-  Target
+  Target,
+  Video,
+  Image as ImageIcon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Task, UserProfile } from '../lib/types';
 import ChildDetailedView from './ChildDetailedView';
+import TaskModal from './TaskModal';
 
 interface ParentDashboardProps {
   parentProfile: UserProfile;
@@ -31,10 +34,7 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
   const [isAssigning, setIsAssigning] = useState(false);
   const [childEmail, setChildEmail] = useState('');
   const [isDetailedViewOpen, setIsDetailedViewOpen] = useState(false);
-  
-  // New Task State
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskXp, setNewTaskXp] = useState(150);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
   useEffect(() => {
     fetchChildren();
@@ -87,23 +87,23 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
     }
   };
 
-  const assignTask = async () => {
-    if (!selectedChild || !newTaskTitle) return;
+  const handleSaveTask = async (taskData: any) => {
+    if (!selectedChild) return;
     
     const { error } = await supabase.from('tasks').insert([{
-      title: newTaskTitle,
+      ...taskData,
       user_id: selectedChild.id,
-      xp: newTaskXp,
-      status: 'pending',
       assigned_by: parentProfile.id,
-      module: 'Parental'
+      status: 'pending'
     }]);
 
     if (!error) {
       alert('Mission Deployed to Child Terminal.');
-      setNewTaskTitle('');
-      setIsAssigning(false);
+      setIsTaskModalOpen(false);
       fetchChildTasks(selectedChild.id);
+    } else {
+      console.error('Deployment Error:', error);
+      alert('TACTICAL ERROR: Deployment signal lost.');
     }
   };
 
@@ -250,7 +250,7 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
                   <div className="flex justify-between items-center px-2">
                     <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">MISSION LOG: {selectedChild.full_name}</h3>
                     <button 
-                      onClick={() => setIsAssigning(!isAssigning)}
+                      onClick={() => setIsTaskModalOpen(true)}
                       className="flex items-center space-x-2 bg-white/5 hover:bg-[#00f2ff]/10 border border-white/10 hover:border-[#00f2ff]/30 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
                     >
                       <Target size={14} className="text-[#00f2ff]" />
@@ -258,37 +258,7 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
                     </button>
                   </div>
 
-                  {isAssigning && (
-                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-6 rounded-2xl border-[#00f2ff]/30 space-y-4">
-                      <div className="grid grid-cols-12 gap-4">
-                        <div className="col-span-8">
-                          <input 
-                            type="text" 
-                            placeholder="MISSION TITLE..." 
-                            value={newTaskTitle}
-                            onChange={(e) => setNewTaskTitle(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-xs outline-none focus:border-[#00f2ff]/50 transition-all font-mono"
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <input 
-                            type="number" 
-                            value={newTaskXp}
-                            onChange={(e) => setNewTaskXp(Number(e.target.value))}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-xs outline-none font-mono"
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <button 
-                            onClick={assignTask}
-                            className="w-full h-full bg-[#00f2ff] text-black font-black text-[10px] rounded-xl uppercase tracking-widest hover:scale-105 transition-all"
-                          >
-                            Deploy
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
+
 
                   <div className="space-y-3">
                     {childTasks.length === 0 ? (
@@ -298,30 +268,54 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
                     ) : (
                       childTasks.map(task => (
                         <div key={task.id} className="glass-panel p-5 rounded-2xl flex items-center justify-between border-transparent hover:border-white/10 transition-all group">
-                          <div className="flex items-center space-x-5">
+                          <div className="flex items-center space-x-5 flex-1">
                             <button 
                               onClick={() => {
                                 const next = task.status === 'pending' ? 'in-progress' : task.status === 'in-progress' ? 'completed' : 'pending';
                                 updateChildTaskStatus(task, next);
                               }}
-                              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${task.status === 'completed' ? 'bg-green-500/10 text-green-500' : task.status === 'in-progress' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-slate-500/10 text-slate-500'}`}
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${task.status === 'completed' ? 'bg-green-500/10 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.1)]' : task.status === 'in-progress' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-slate-500/10 text-slate-500'}`}
                             >
-                              {task.status === 'completed' ? <CheckCircle2 size={18} /> : <TrendingUp size={18} />}
+                              {task.status === 'completed' ? <CheckCircle2 size={20} /> : <TrendingUp size={20} />}
                             </button>
-                            <div>
-                              <h4 className={`font-bold text-white ${task.status === 'completed' ? 'line-through opacity-40' : ''}`}>{task.title}</h4>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2">
+                                <h4 className={`font-bold text-white truncate ${task.status === 'completed' ? 'line-through opacity-40' : ''}`}>{task.title}</h4>
+                                {task.assigned_by === parentProfile.id && (
+                                  <span className="px-2 py-0.5 bg-[#00f2ff]/10 text-[#00f2ff] text-[8px] font-black uppercase rounded-md border border-[#00f2ff]/20">MANDATED</span>
+                                )}
+                              </div>
                               <p className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest mt-1">
                                 STATUS: {task.status.toUpperCase()} • BOUNTY: {task.xp} XP
-                                {task.assigned_by === parentProfile.id && <span className="ml-2 text-[#00f2ff]">• ASSIGNED BY YOU</span>}
                               </p>
                             </div>
                           </div>
                           
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-4 ml-4">
                             {task.status === 'completed' && (task.proof_screenshot_url || task.proof_video_url) && (
                               <div className="flex items-center space-x-2">
                                 {task.proof_screenshot_url && (
-                                  <a href={task.proof_screenshot_url} target="_blank" rel="noreferrer" className="p-2 bg-white/5 rounded-lg text-slate-400 hover:text-[#00f2ff]"><Eye size={16} /></a>
+                                  <div className="relative group/proof">
+                                    <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 group-hover/proof:border-[#00f2ff]/50 transition-all">
+                                      <img src={task.proof_screenshot_url} alt="Proof" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/proof:opacity-100 flex items-center justify-center transition-all rounded-lg">
+                                      <a href={task.proof_screenshot_url} target="_blank" rel="noreferrer" className="text-white">
+                                        <Eye size={14} />
+                                      </a>
+                                    </div>
+                                  </div>
+                                )}
+                                {task.proof_video_url && (
+                                  <a 
+                                    href={task.proof_video_url} 
+                                    target="_blank" 
+                                    rel="noreferrer" 
+                                    className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500 hover:bg-purple-500/20 transition-all"
+                                    title="View Video Proof"
+                                  >
+                                    <Video size={16} />
+                                  </a>
                                 )}
                               </div>
                             )}
@@ -353,7 +347,19 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
           <ChildDetailedView 
             child={selectedChild} 
             tasks={childTasks} 
+            parentProfile={parentProfile}
+            onRefresh={() => fetchChildTasks(selectedChild.id)}
             onClose={() => setIsDetailedViewOpen(false)} 
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {isTaskModalOpen && (
+          <TaskModal 
+            isOpen={isTaskModalOpen}
+            onClose={() => setIsTaskModalOpen(false)}
+            onSave={handleSaveTask}
+            modules={parentProfile.custom_modules || ['Parental', 'Life', 'Skills']}
           />
         )}
       </AnimatePresence>

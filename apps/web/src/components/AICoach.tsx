@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Send, X, Terminal, Zap, BarChart3, Target, Activity } from 'lucide-react';
 import { detectOperativeState, OperativeState } from '../lib/ai/stateDetection';
 import { generateCoachingResponse, generateIntelligentResponse, AIIntent } from '../lib/ai/responseEngine';
+import { getNeuralPings, analyzeTaskPatterns, NeuralPing } from '../lib/ai/reminderService';
 import { supabase } from '../lib/supabase';
 import { calculateLevel } from '../lib/gameLogic';
 
@@ -12,33 +13,66 @@ export default function AICoach({ userId }: { userId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [state, setState] = useState<OperativeState>('neutral');
-  const [chat, setChat] = useState<{ role: 'ai' | 'user'; text: any }[]>([
-    { role: 'ai', text: "Hi there! I'm your productivity coach. I've been looking over your progress—how can I help you stay on track today?" }
-  ]);
+  const [chat, setChat] = useState<{ role: 'ai' | 'user'; text: any }[]>([]);
+  const [pings, setPings] = useState<NeuralPing[]>([]);
+  const [briefing, setBriefing] = useState<string>('');
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       updateState();
-      fetchProfile();
+      fetchProfileAndData();
     }
   }, [isOpen]);
 
-  const fetchProfile = async () => {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (data) {
-      setProfile(data);
-      setChat(prev => {
-        if (prev.length === 1 && prev[0].role === 'ai') {
-          const name = data.full_name?.split(' ')[0] || 'Arpan';
-          return [{
-            role: 'ai',
-            text: `Hi ${name}! I'm your productivity coach. I've been looking over your progress—how can I help you stay on track today?`
-          }];
+  const fetchProfileAndData = async () => {
+    const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    const { data: taskData } = await supabase.from('tasks').select('*').eq('user_id', userId);
+    const neuralPings = await getNeuralPings(userId);
+    
+    if (profileData) {
+      setProfile(profileData);
+      setPings(neuralPings);
+      
+      const analysisInsight = analyzeTaskPatterns(taskData || []);
+      setBriefing(analysisInsight);
+
+      const name = profileData.full_name?.split(' ')[0] || 'Operator';
+      setChat([
+        { 
+          role: 'ai', 
+          text: (
+            <div className="space-y-4">
+              <p>Welcome back, <span className="text-white font-bold">{name}</span>. I've synchronized with your terminal data.</p>
+              
+              {neuralPings.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[9px] font-black text-red-500 uppercase tracking-widest flex items-center space-x-2">
+                    <Activity size={12} />
+                    <span>Neural Pings (Priority Alerts)</span>
+                  </p>
+                  {neuralPings.slice(0, 2).map(ping => (
+                    <div key={ping.id} className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                      <p className="text-[10px] text-red-400 font-bold">{ping.message}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                <p className="text-[9px] font-black text-[#00f2ff] uppercase tracking-widest mb-2 flex items-center space-x-2">
+                  <Target size={12} />
+                  <span>Tactical Briefing</span>
+                </p>
+                <p className="text-[11px] italic text-slate-300">"{analysisInsight}"</p>
+              </div>
+
+              <p className="text-xs text-slate-400">Ready for your next maneuver? Send a command or type a query.</p>
+            </div>
+          ) 
         }
-        return prev;
-      });
+      ]);
     }
   };
 
@@ -61,6 +95,7 @@ export default function AICoach({ userId }: { userId: string }) {
     else if (lower.includes('strategy') || lower.includes('how to')) intent = 'strategy';
     else if (lower.includes('low') || lower.includes('sad') || lower.includes('tired') || lower.includes('motivate')) intent = 'motivation';
     else if (lower.includes('teach') || lower.includes('knowledge') || lower.includes('concept')) intent = 'knowledge';
+    else if (lower.includes('analyze') || lower.includes('pattern') || lower.includes('deep')) intent = 'deep_analysis';
 
     // 2. Detect state
     const currentState = await updateState(command);
@@ -180,11 +215,11 @@ export default function AICoach({ userId }: { userId: string }) {
                 <span>Motivation</span>
               </button>
               <button 
-                onClick={() => handleCommand('Teach me')}
-                className="flex items-center justify-center space-x-2 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-[10px] font-bold uppercase tracking-widest"
+                onClick={() => handleCommand('Deep Analysis')}
+                className="flex items-center justify-center space-x-2 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-[10px] font-bold uppercase tracking-widest col-span-2"
               >
-                <BarChart3 size={14} className="text-emerald-500" />
-                <span>Knowledge</span>
+                <Activity size={14} className="text-emerald-500" />
+                <span>Run Deep Analysis</span>
               </button>
             </div>
 

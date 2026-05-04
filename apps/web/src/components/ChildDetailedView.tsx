@@ -11,25 +11,51 @@ import {
   CheckCircle2, 
   TrendingUp, 
   ShieldAlert,
-  ArrowLeft
+  ArrowLeft,
+  Video,
+  Eye,
+  Clock,
+  ExternalLink
 } from 'lucide-react';
 import { calculateLevel, getIdentity, getPhase } from '../lib/gameLogic';
 import type { Task, UserProfile } from '../lib/types';
 import AIInsights from './AIInsights';
 import Reports from './Reports';
+import TaskModal from './TaskModal';
+import { supabase } from '../lib/supabase';
 
 interface ChildDetailedViewProps {
   child: UserProfile;
   tasks: Task[];
   onClose: () => void;
+  onRefresh?: () => void;
+  parentProfile: UserProfile;
 }
 
-export default function ChildDetailedView({ child, tasks, onClose }: ChildDetailedViewProps) {
+export default function ChildDetailedView({ child, tasks, onClose, onRefresh, parentProfile }: ChildDetailedViewProps) {
+  const [isTaskModalOpen, setIsTaskModalOpen] = React.useState(false);
   const level = calculateLevel(child.xp || 0);
   const phase = getPhase(level);
   const identity = getIdentity(level);
   const xpInLevel = (child.xp || 0) % 1000;
   const progress = (xpInLevel / 1000) * 100;
+
+  const handleAssignTask = async (taskData: any) => {
+    const { error } = await supabase.from('tasks').insert([{
+      ...taskData,
+      user_id: child.id,
+      assigned_by: parentProfile.id,
+      status: 'pending'
+    }]);
+
+    if (!error) {
+      alert('Mission Deployed Successfully.');
+      setIsTaskModalOpen(false);
+      if (onRefresh) onRefresh();
+    } else {
+      alert('Failed to deploy mission.');
+    }
+  };
 
   return (
     <motion.div 
@@ -56,7 +82,14 @@ export default function ChildDetailedView({ child, tasks, onClose }: ChildDetail
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-6">
+          <button 
+            onClick={() => setIsTaskModalOpen(true)}
+            className="hidden md:flex items-center space-x-2 bg-[#00f2ff]/10 text-[#00f2ff] border border-[#00f2ff]/30 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#00f2ff] hover:text-black transition-all"
+          >
+            <Target size={16} />
+            <span>Deploy Mandate</span>
+          </button>
           <div className="text-right hidden md:block">
             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Connection Status</p>
             <p className="text-[10px] font-black text-emerald-500 uppercase">Neural Link Stable</p>
@@ -169,7 +202,111 @@ export default function ChildDetailedView({ child, tasks, onClose }: ChildDetail
             </div>
           </aside>
         </div>
+
+        {/* New Mission Log Archive Section */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center space-x-3">
+              <Target size={18} className="text-[#00f2ff]" />
+              <h3 className="text-[10px] font-black tracking-[0.3em] text-[#00f2ff] uppercase">MISSION LOG ARCHIVE</h3>
+            </div>
+            <div className="flex space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-[#00f2ff]" />
+                <span className="text-[9px] font-bold text-slate-500 uppercase">Mandated</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="text-[9px] font-bold text-slate-500 uppercase">Secured</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {tasks.length === 0 ? (
+              <div className="col-span-full py-20 text-center glass-panel rounded-3xl opacity-50">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">No Tactical Data Recorded</p>
+              </div>
+            ) : (
+              tasks.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map(task => (
+                <motion.div 
+                  key={task.id}
+                  whileHover={{ y: -5 }}
+                  className={`glass-panel p-6 rounded-3xl border-2 transition-all ${task.status === 'completed' ? 'border-green-500/20 bg-green-500/5' : 'border-white/5'} ${task.assigned_by ? 'ring-1 ring-[#00f2ff]/20' : ''}`}
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className={`p-2 rounded-lg ${task.status === 'completed' ? 'bg-green-500/10 text-green-500' : 'bg-slate-500/10 text-slate-500'}`}>
+                      {task.status === 'completed' ? <CheckCircle2 size={18} /> : <Clock size={18} />}
+                    </div>
+                    {task.assigned_by && (
+                      <span className="px-2 py-0.5 bg-[#00f2ff]/10 text-[#00f2ff] text-[8px] font-black uppercase rounded-md border border-[#00f2ff]/20">MANDATED</span>
+                    )}
+                  </div>
+
+                  <h4 className={`text-sm font-bold text-white mb-2 ${task.status === 'completed' ? 'opacity-60' : ''}`}>{task.title}</h4>
+                  
+                  <div className="flex items-center space-x-3 mb-6">
+                    <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">XP: {task.xp}</span>
+                    <div className="w-1 h-1 rounded-full bg-slate-800" />
+                    <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">TYPE: {task.type}</span>
+                  </div>
+
+                  {task.status === 'completed' && (task.proof_screenshot_url || task.proof_video_url) ? (
+                    <div className="space-y-4">
+                      <p className="text-[9px] font-black text-[#00f2ff] uppercase tracking-widest mb-2 flex items-center space-x-2">
+                        <Eye size={12} />
+                        <span>Intelligence Proof</span>
+                      </p>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        {task.proof_screenshot_url && (
+                          <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10 group/img">
+                            <img src={task.proof_screenshot_url} className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110" alt="Proof" />
+                            <a 
+                              href={task.proof_screenshot_url} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-all"
+                            >
+                              <ExternalLink size={16} className="text-white" />
+                            </a>
+                          </div>
+                        )}
+                        {task.proof_video_url && (
+                          <a 
+                            href={task.proof_video_url} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="relative aspect-video rounded-xl overflow-hidden border border-purple-500/20 bg-purple-500/5 flex flex-col items-center justify-center group/vid transition-all hover:bg-purple-500/10"
+                          >
+                            <Video size={20} className="text-purple-500 mb-1" />
+                            <span className="text-[8px] font-black text-purple-500 uppercase">Video Feed</span>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ) : task.status === 'completed' ? (
+                    <div className="p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/20">
+                      <p className="text-[9px] font-bold text-yellow-500/60 uppercase text-center italic">Visual Evidence Missing</p>
+                    </div>
+                  ) : null}
+                </motion.div>
+              ))
+            )}
+          </div>
+        </section>
       </main>
+
+      <AnimatePresence>
+        {isTaskModalOpen && (
+          <TaskModal 
+            isOpen={isTaskModalOpen}
+            onClose={() => setIsTaskModalOpen(false)}
+            onSave={handleAssignTask}
+            modules={parentProfile.custom_modules || ['Parental', 'Life', 'Skills']}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
