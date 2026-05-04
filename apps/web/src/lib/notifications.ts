@@ -11,15 +11,24 @@ export const initNotifications = async () => {
     }
     return false;
   } else {
-    // Native notifications (Android/iOS)
-    const permStatus = await LocalNotifications.requestPermissions();
-    if (permStatus.display === 'granted') {
-      // Also register for push if on native
-      await PushNotifications.requestPermissions();
-      await PushNotifications.register();
-      return true;
+    try {
+      // Native notifications (Android/iOS)
+      const permStatus = await LocalNotifications.requestPermissions();
+      if (permStatus.display === 'granted') {
+        // Also register for push if on native
+        try {
+          await PushNotifications.requestPermissions();
+          await PushNotifications.register();
+        } catch (pushErr) {
+          console.warn('Push registration failed, continuing with local only:', pushErr);
+        }
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Local notification permission failed:', err);
+      return false;
     }
-    return false;
   }
 };
 

@@ -87,8 +87,15 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (session) {
-      initialize();
-      initNotifications(); // Request permissions for Web/APK
+      const safeInit = async () => {
+        try {
+          await initialize();
+          await initNotifications();
+        } catch (err) {
+          console.error('MOBILE_INIT_CRASH_PREVENTED:', err);
+        }
+      };
+      safeInit();
     }
   }, [session]);
 

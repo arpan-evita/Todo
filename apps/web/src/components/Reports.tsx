@@ -22,6 +22,12 @@ interface ReportsProps {
 }
 
 export default function Reports({ tasks }: ReportsProps) {
+  const [mounted, setMounted] = React.useState(false);
+  
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const completedTasks = tasks.filter(t => t.status === 'completed');
   
   // XP by Module
@@ -51,21 +57,27 @@ export default function Reports({ tasks }: ReportsProps) {
             <h3 className="text-xs font-bold uppercase tracking-widest">XP BY MODULE</h3>
           </div>
           <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                <XAxis dataKey="name" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0a0a0f', border: '1px solid #333', borderRadius: '12px' }}
-                  itemStyle={{ color: '#00f2ff', fontSize: '10px', fontWeight: 'bold' }}
-                />
-                <Bar dataKey="xp" radius={[4, 4, 0, 0]}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {mounted ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                  <XAxis dataKey="name" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#0a0a0f', border: '1px solid #333', borderRadius: '12px' }}
+                    itemStyle={{ color: '#00f2ff', fontSize: '10px', fontWeight: 'bold' }}
+                  />
+                  <Bar dataKey="xp" radius={[4, 4, 0, 0]}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-[#00f2ff]/20 border-t-[#00f2ff] rounded-full animate-spin" />
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -76,29 +88,35 @@ export default function Reports({ tasks }: ReportsProps) {
             <h3 className="text-xs font-bold uppercase tracking-widest">MISSION LOAD</h3>
           </div>
           <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={[
-                    { name: 'Completed', value: tasks.filter(t => t.status === 'completed').length },
-                    { name: 'Active', value: tasks.filter(t => t.status === 'in-progress').length },
-                    { name: 'Pending', value: tasks.filter(t => t.status === 'pending').length },
-                  ]}
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  <Cell fill="#00ff88" />
-                  <Cell fill="#ffb800" />
-                  <Cell fill="#333" />
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0a0a0f', border: '1px solid #333', borderRadius: '12px' }}
-                  itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            {mounted ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Completed', value: tasks.filter(t => t.status === 'completed').length },
+                      { name: 'Active', value: tasks.filter(t => t.status === 'in-progress').length },
+                      { name: 'Pending', value: tasks.filter(t => t.status === 'pending').length },
+                    ]}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    <Cell fill="#00ff88" />
+                    <Cell fill="#ffb800" />
+                    <Cell fill="#333" />
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#0a0a0f', border: '1px solid #333', borderRadius: '12px' }}
+                    itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-[#00f2ff]/20 border-t-[#00f2ff] rounded-full animate-spin" />
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
