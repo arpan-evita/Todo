@@ -62,6 +62,9 @@ export default function Dashboard() {
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [activeTaskIdMenu, setActiveTaskIdMenu] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<{ id: string; msg: string; type: 'info' | 'warn' }[]>([]);
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterModule, setFilterModule] = useState('All');
 
   const addNotification = (msg: string, type: 'info' | 'warn' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -284,7 +287,13 @@ export default function Dashboard() {
         <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f2ff] to-[#7000ff] tracking-tighter uppercase italic">AUTOGROWX: MISSION CONTROL</div>
         <div className="flex items-center space-x-6">
           <div className="hidden md:flex items-center bg-white/5 border border-white/10 rounded-lg px-4 py-2 w-96 group hover:border-[#00f2ff]/50 transition-all">
-            <Search className="w-4 h-4 text-slate-400 mr-2 group-hover:text-[#00f2ff]" /><input placeholder="QUERY MISSION DATABASE..." className="bg-transparent border-none outline-none text-[10px] font-mono font-bold tracking-widest text-white placeholder-slate-500 w-full" />
+            <Search className="w-4 h-4 text-slate-400 mr-2 group-hover:text-[#00f2ff]" />
+            <input 
+              placeholder="QUERY MISSION DATABASE..." 
+              className="bg-transparent border-none outline-none text-[10px] font-mono font-bold tracking-widest text-white placeholder-slate-500 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
           <button className="text-slate-400 hover:text-[#00f2ff] relative"><Bell size={20} /><span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" /></button>
           <div className="w-10 h-10 rounded-full border border-[#00f2ff]/50 overflow-hidden hover:ring-2 hover:ring-[#00f2ff]/50 cursor-pointer" onClick={() => setActiveTab('profile')}>
@@ -350,6 +359,24 @@ export default function Dashboard() {
                   </div>
                 </motion.section>
 
+                {/* Filter Bar */}
+                <div className="flex flex-wrap items-center gap-4 bg-white/5 border border-white/10 p-4 rounded-xl">
+                  <div className="flex items-center space-x-4">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Filter Sector:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {['All', ...(profile.custom_modules || [])].map(m => (
+                        <button 
+                          key={m} 
+                          onClick={() => setFilterModule(m)}
+                          className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${filterModule === m ? 'bg-[#00f2ff] text-black shadow-[0_0_15px_rgba(0,242,255,0.3)]' : 'bg-white/5 text-slate-400 hover:text-white border border-white/5'}`}
+                        >
+                          {m}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Missions */}
                 <div className="space-y-12">
                   {[
@@ -357,8 +384,17 @@ export default function Dashboard() {
                     { id: 'in-progress', label: 'ACTIVE_OPS', color: 'text-yellow-400' },
                     { id: 'completed', label: 'COMPLETED_MANDATES', color: 'text-green-400' }
                   ].map(phase => {
-                    const phaseTasks = tasks.filter(t => t.status === phase.id);
-                    if (phaseTasks.length === 0 && phase.id !== 'pending') return null;
+                    const phaseTasks = tasks.filter(t => {
+                      const matchesPhase = t.status === phase.id;
+                      const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase());
+                      const matchesModule = filterModule === 'All' || t.module === filterModule;
+                      return matchesPhase && matchesSearch && matchesModule;
+                    });
+                    
+                    const isFiltering = searchQuery || filterModule !== 'All';
+                    if (phaseTasks.length === 0 && (phase.id !== 'pending' && !isFiltering)) return null;
+                    if (phaseTasks.length === 0 && phase.id !== 'pending' && isFiltering) return null;
+
                     return (
                       <div key={phase.id} className="space-y-4">
                          <div className="flex justify-between items-center px-2">
@@ -420,8 +456,14 @@ export default function Dashboard() {
                                </div>
                              </motion.div>
                            ))}
-                         </div>
-                      </div>
+                          </div>
+                          {phaseTasks.length === 0 && (
+                            <div className="glass-panel p-8 rounded-xl flex flex-col items-center justify-center text-center border-dashed border-white/10">
+                              <Search size={24} className="text-slate-700 mb-3" />
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">No matching mandates found in this sector</p>
+                            </div>
+                          )}
+                       </div>
                     );
                   })}
                 </div>

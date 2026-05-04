@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Send, X, Terminal, Zap, BarChart3, Target, Activity } from 'lucide-react';
 import { detectOperativeState, OperativeState } from '../lib/ai/stateDetection';
-import { generateCoachingResponse, generateIntelligentResponse, AIIntent } from '../lib/ai/responseEngine';
+import { generateCoachingResponse, generateIntelligentResponse, AIIntent, detectAgentAction, AIAction } from '../lib/ai/responseEngine';
 import { getNeuralPings, analyzeTaskPatterns, NeuralPing } from '../lib/ai/reminderService';
+import { initNotifications, sendNotification } from '../lib/notifications';
 import { supabase } from '../lib/supabase';
 import { calculateLevel } from '../lib/gameLogic';
 
@@ -21,10 +22,58 @@ export default function AICoach({ userId }: { userId: string }) {
 
   useEffect(() => {
     if (isOpen) {
+      initNotifications();
       updateState();
       fetchProfileAndData();
     }
   }, [isOpen]);
+
+  const executeAgentAction = async (action: AIAction) => {
+    try {
+      setLoading(true);
+      let success = false;
+      let message = "";
+
+      switch (action.type) {
+        case 'complete_task':
+          const { error: compError } = await supabase.from('tasks').update({ status: 'completed' }).eq('id', action.payload.taskId);
+          success = !compError;
+          message = success ? `Mandate Secured: ${action.payload.title}` : "Securement signal lost.";
+          break;
+        case 'delete_task':
+          const { error: delError } = await supabase.from('tasks').delete().eq('id', action.payload.taskId);
+          success = !delError;
+          message = success ? `Mandate Terminated: ${action.payload.title}` : "Termination command failed.";
+          break;
+        case 'change_mode':
+          const { error: modeError } = await supabase.from('profiles').update({ mode: action.payload }).eq('id', userId);
+          success = !modeError;
+          message = success ? `UNIT MODE OVERRIDE: ${action.payload.toUpperCase()} ACTIVE` : "Override synchronization failure.";
+          break;
+        case 'assign_task':
+          const { error: assError } = await supabase.from('tasks').insert([{
+            ...action.payload,
+            user_id: userId,
+            status: 'pending'
+          }]);
+          success = !assError;
+          message = success ? `New Mandate Deployed: ${action.payload.title}` : "Deployment failed.";
+          break;
+      }
+
+      if (success) {
+        sendNotification("AGENT ACTION COMPLETE", message);
+        await fetchProfileAndData();
+        return message;
+      }
+      return "Critical failure in agent execution layer.";
+    } catch (err) {
+      console.error('AGENT_EXECUTION_FAILURE:', err);
+      return "Neural interface error during execution.";
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchProfileAndData = async () => {
     const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single();
@@ -91,6 +140,29 @@ export default function AICoach({ userId }: { userId: string }) {
     // 1. Detect Intent from keywords
     let intent: AIIntent = 'general';
     const lower = command.toLowerCase();
+    
+    // Check for Agent Action first
+    const agentAction = detectAgentAction(command, pendingTasks || []);
+    if (agentAction) {
+      intent = 'execute';
+      const resultMessage = await executeAgentAction(agentAction);
+      setChat(prev => [...prev, { 
+        role: 'ai', 
+        text: (
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 text-emerald-500">
+              <Zap size={14} className="animate-pulse" />
+              <span className="font-black text-[10px] uppercase tracking-widest">Agent Execution Layer Active</span>
+            </div>
+            <p className="font-bold text-white uppercase tracking-tighter">{resultMessage}</p>
+            <p className="text-[9px] text-slate-500 italic uppercase tracking-widest">Neural link confirmed. Database synchronized.</p>
+          </div>
+        ) 
+      }]);
+      setLoading(false);
+      return;
+    }
+
     if (lower.includes('plan')) intent = 'plan';
     else if (lower.includes('strategy') || lower.includes('how to')) intent = 'strategy';
     else if (lower.includes('low') || lower.includes('sad') || lower.includes('tired') || lower.includes('motivate')) intent = 'motivation';

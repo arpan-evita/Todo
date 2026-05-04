@@ -1,14 +1,20 @@
 import { STRATEGIES } from './strategyLibrary';
 import { OperativeState } from './stateDetection';
 
+export interface AIAction {
+  type: 'complete_task' | 'delete_task' | 'assign_task' | 'change_mode';
+  payload: any;
+}
+
 export interface CoachingResponse {
   insight: string;
   action: string;
   urgency: string;
   tone: string;
+  agentAction?: AIAction;
 }
 
-export type AIIntent = 'general' | 'plan' | 'strategy' | 'motivation' | 'knowledge' | 'deep_analysis';
+export type AIIntent = 'general' | 'plan' | 'strategy' | 'motivation' | 'knowledge' | 'deep_analysis' | 'execute';
 
 const TONE_MAP: Record<OperativeState, any> = {
   driven: {
@@ -140,6 +146,14 @@ export const generateIntelligentResponse = async (
       }
       break;
 
+    case 'execute':
+      tone = "OPERATIONAL AGENT";
+      insight = "Scanning terminal for target...";
+      action = "Executing mandate: [REDACTED]";
+      urgency = "Mandate status: IN PROGRESS";
+      // This is handled by a separate function in AICoach or we can set it here if we know the specific task
+      break;
+
     case 'general':
       tone = "COACH CHAT";
       insight = WITTY_REPLIES[Math.floor(Math.random() * WITTY_REPLIES.length)];
@@ -222,4 +236,44 @@ export const generateCoachingResponse = async (
   }
 
   return { insight, action, urgency, tone: config.prefix };
+};
+
+export const detectAgentAction = (text: string, pendingTasks: any[]): AIAction | null => {
+  const lower = text.toLowerCase();
+  
+  // 1. Complete Task
+  if (lower.match(/complete|finish|done|check/)) {
+    const task = pendingTasks.find(t => lower.includes(t.title.toLowerCase()));
+    if (task) return { type: 'complete_task', payload: { taskId: task.id, title: task.title } };
+  }
+  
+  // 2. Delete Task
+  if (lower.match(/delete|remove|terminate|destroy/)) {
+    const task = pendingTasks.find(t => lower.includes(t.title.toLowerCase()));
+    if (task) return { type: 'delete_task', payload: { taskId: task.id, title: task.title } };
+  }
+  
+  // 3. Change Mode
+  if (lower.match(/change mode|set mode|switch to/)) {
+    const modes = ['builder', 'money', 'monk', 'war'];
+    const targetMode = modes.find(m => lower.includes(m));
+    if (targetMode) return { type: 'change_mode', payload: targetMode.charAt(0).toUpperCase() + targetMode.slice(1) };
+  }
+
+  // 4. Assign Task (Simple version)
+  if (lower.match(/assign|add task|new mandate/)) {
+    const titleMatch = text.match(/(?:assign|add task|new mandate)\s+(.+?)(?:\s+with|$)/i);
+    if (titleMatch) {
+      return { 
+        type: 'assign_task', 
+        payload: { 
+          title: titleMatch[1].trim(),
+          xp: 150,
+          priority: 'medium'
+        } 
+      };
+    }
+  }
+
+  return null;
 };

@@ -1,5 +1,6 @@
 import { supabase } from '../supabase';
 import type { Task } from '../types';
+import { sendNotification } from '../notifications';
 
 export interface NeuralPing {
   id: string;
@@ -59,7 +60,14 @@ export const getNeuralPings = async (userId: string): Promise<NeuralPing[]> => {
 
     // Sort by urgency
     const urgencyWeight = { critical: 3, high: 2, medium: 1 };
-    return pings.sort((a, b) => urgencyWeight[b.urgency] - urgencyWeight[a.urgency]);
+    const sortedPings = pings.sort((a, b) => urgencyWeight[b.urgency] - urgencyWeight[a.urgency]);
+
+    // Trigger System Notifications for critical pings
+    sortedPings.filter(p => p.urgency === 'critical' || p.urgency === 'high').forEach(ping => {
+      sendNotification(`NEURAL ALERT: ${ping.type.toUpperCase()}`, ping.message);
+    });
+
+    return sortedPings;
   } catch (err) {
     console.error('NEURAL_PING_FAILURE:', err);
     return [];
