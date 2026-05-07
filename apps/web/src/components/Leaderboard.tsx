@@ -26,33 +26,40 @@ export default function Leaderboard({ currentUser }: LeaderboardProps) {
 
   const fetchLeaders = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('profiles')
-      .select(`
-        id, 
-        full_name, 
-        xp, 
-        level, 
-        avatar_url,
-        user_achievements (
-          achievementId
-        )
-      `)
-      .order('xp', { ascending: false })
-      .limit(50);
-    
-    if (data) {
-      setLeaders(data);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          id, 
+          full_name, 
+          xp, 
+          level, 
+          avatar_url
+        `)
+        .order('xp', { ascending: false })
+        .limit(50);
+      
+      if (error) {
+        console.error('LEADERBOARD_FETCH_ERROR:', error);
+      }
+      
+      if (data) {
+        setLeaders(data);
+      }
+    } catch (err) {
+      console.error('LEADERBOARD_CRASH:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Calculate accurate rankings handling ties
+  let currentRank = 1;
   const rankedLeaders = leaders.map((leader, index) => {
-    const rank = index > 0 && leaders[index - 1].xp === leader.xp 
-      ? leaders[index - 1].rank 
-      : index + 1;
-    return { ...leader, rank };
+    if (index > 0 && leaders[index - 1].xp !== leader.xp) {
+      currentRank = index + 1;
+    }
+    return { ...leader, rank: currentRank };
   });
 
   const currentUserData = rankedLeaders.find(l => l.id === currentUser.id);
