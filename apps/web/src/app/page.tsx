@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAndPenalties, calculateNewStreak, calculateMultiplier } from '../lib/gameLogic';
+import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAndPenalties, calculateNewStreak, calculateMultiplier, getProgressXp, getXpToLevelUp } from '../lib/gameLogic';
 import { checkNewAchievements } from '../lib/achievements';
 import type { Task, Status } from '../lib/types';
 import { initNotifications, sendNotification } from '../lib/notifications';
@@ -431,14 +431,14 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <p className="text-slate-500 text-[10px] font-bold tracking-widest uppercase mb-1 leading-none">NEXT IDENTITY SHIFT</p>
-                      <p className="text-3xl font-black tracking-tight">{1000 - (xp % 1000)} XP</p>
+                      <p className="text-3xl font-black tracking-tight">{getXpToLevelUp(level) - getProgressXp(xp)} XP</p>
                     </div>
                   </div>
                   <div className="w-full h-4 bg-white/5 rounded-full overflow-hidden mb-3 border border-white/10 cyber-glow-inner p-1">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${(xp % 1000) / 10}%` }} transition={{ duration: 1.5 }} className="h-full bg-gradient-to-r from-[#00f2ff] via-[#00f2ff] to-[#7000ff] rounded-full xp-bar-glow" />
+                    <motion.div initial={{ width: 0 }} animate={{ width: `${(getProgressXp(xp) / getXpToLevelUp(level)) * 100}%` }} transition={{ duration: 1.5 }} className="h-full bg-gradient-to-r from-[#00f2ff] via-[#00f2ff] to-[#7000ff] rounded-full xp-bar-glow" />
                   </div>
                   <div className="flex justify-between text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">
-                    <span>{xp % 1000} / 1000 XP</span>
+                    <span>{getProgressXp(xp)} / {getXpToLevelUp(level)} XP</span>
                     <span className="text-[#00f2ff]">{getPhase(level).name} PHASE</span>
                   </div>
                 </motion.section>

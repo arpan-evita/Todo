@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Trophy, Zap, Target, Award, ShieldCheck, Edit3, Upload, Globe, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { calculateLevel, getProgressXp, getXpToLevelUp } from '../lib/gameLogic';
 import type { Task } from '../lib/types';
 
 interface LevelBoardProps {
@@ -22,8 +23,9 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
   const [socials, setSocials] = useState(profile.social_links || {});
   const [uploading, setUploading] = useState(false);
 
-  const currentLevelXp = xp % 1000;
-  const progress = (currentLevelXp / 1000) * 100;
+  const currentLevelXp = getProgressXp(xp);
+  const nextLevelTotalXp = getXpToLevelUp(level);
+  const progress = (currentLevelXp / nextLevelTotalXp) * 100;
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +109,7 @@ export default function LevelBoard({ xp, level, streak, tasks, profile, onUpdate
              <h3 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter uppercase relative z-10">{profile.full_name || 'OPERATIVE'}</h3>
              <p className="font-mono text-[#00f2ff] text-[10px] md:text-xs font-bold tracking-[0.3em] mt-2 uppercase relative z-10">RANK: {level} • ELITE COMMANDER</p>
              <div className="w-full mt-10 relative z-10">
-                <div className="flex justify-between text-[9px] md:text-[10px] font-mono font-bold text-slate-500 mb-3 uppercase tracking-widest px-1"><span>EXP: {currentLevelXp} / 1000</span><span className="text-[#00f2ff]">{Math.round(progress)}% COMPLETE</span></div>
+                <div className="flex justify-between text-[9px] md:text-[10px] font-mono font-bold text-slate-500 mb-3 uppercase tracking-widest px-1"><span>EXP: {currentLevelXp} / {nextLevelTotalXp}</span><span className="text-[#00f2ff]">{Math.round(progress)}% COMPLETE</span></div>
                 <div className="w-full h-3 md:h-4 bg-white/5 rounded-full overflow-hidden border border-white/10 p-1 cyber-glow-inner"><motion.div animate={{ width: `${progress}%` }} transition={{ duration: 1.5 }} className="h-full bg-gradient-to-r from-[#00f2ff] to-[#7000ff] rounded-full" /></div>
              </div>
           </motion.div>

@@ -34,12 +34,38 @@ export const getPhase = (level: number) => {
   return PHASES.find(p => level >= p.range[0] && level <= p.range[1]) || PHASES[PHASES.length - 1];
 };
 
-export const calculateLevel = (xp: number) => {
-  return Math.floor(xp / 1000) + 1;
+export const getXpToLevelUp = (level: number) => {
+  return 1000 + (level - 1) * 500;
+};
+
+export const calculateLevel = (totalXp: number) => {
+  let level = 1;
+  let xpRequired = getXpToLevelUp(level);
+  let tempXp = totalXp;
+  
+  while (tempXp >= xpRequired) {
+    tempXp -= xpRequired;
+    level++;
+    xpRequired = getXpToLevelUp(level);
+  }
+  return level;
+};
+
+export const getProgressXp = (totalXp: number) => {
+  let level = 1;
+  let xpRequired = getXpToLevelUp(level);
+  let tempXp = totalXp;
+  
+  while (tempXp >= xpRequired) {
+    tempXp -= xpRequired;
+    level++;
+    xpRequired = getXpToLevelUp(level);
+  }
+  return tempXp;
 };
 
 export const getNextLevelXp = (level: number) => {
-  return 1000;
+  return getXpToLevelUp(level);
 };
 
 export const calculateMultiplier = (mode: string, streak: number) => {
