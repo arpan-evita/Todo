@@ -42,7 +42,7 @@ export const getNextLevelXp = (level: number) => {
   return 1000;
 };
 
-export const calculateFinalXp = (baseXp: number, mode: string, streak: number) => {
+export const calculateMultiplier = (mode: string, streak: number) => {
   let multiplier = 1.0;
   
   // Mode Multiplier
@@ -54,6 +54,11 @@ export const calculateFinalXp = (baseXp: number, mode: string, streak: number) =
   else if (streak >= 7) multiplier *= 1.25;
   else if (streak >= 3) multiplier *= 1.1;
   
+  return multiplier;
+};
+
+export const calculateFinalXp = (baseXp: number, mode: string, streak: number) => {
+  const multiplier = calculateMultiplier(mode, streak);
   return Math.round(baseXp * multiplier);
 };
 

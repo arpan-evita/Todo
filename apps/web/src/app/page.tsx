@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAndPenalties, calculateNewStreak } from '../lib/gameLogic';
+import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAndPenalties, calculateNewStreak, calculateMultiplier } from '../lib/gameLogic';
 import { checkNewAchievements } from '../lib/achievements';
 import type { Task, Status } from '../lib/types';
 import { initNotifications, sendNotification } from '../lib/notifications';
@@ -213,26 +213,28 @@ export default function Dashboard() {
     if (!error) {
       if (newStatus === 'completed' && oldStatus !== 'completed') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
-        grantXp(finalXp);
         
-        // Update Streak
+        // Calculate new streak
         const newStreak = calculateNewStreak(profile.last_active, streak);
-        if (newStreak !== streak || !profile.last_active) {
-          setStreak(newStreak);
-          const now = new Date().toISOString();
-          setProfile((prev: any) => ({ ...prev, streak: newStreak, last_active: now }));
-          await supabase.from('profiles').update({ 
-            streak: newStreak, 
-            last_active: now 
-          }).eq('id', session.user.id);
-        } else {
-          // Still update last_active to track today's activity
-          const now = new Date().toISOString();
-          setProfile((prev: any) => ({ ...prev, last_active: now }));
-          await supabase.from('profiles').update({ 
-            last_active: now 
-          }).eq('id', session.user.id);
-        }
+        const now = new Date().toISOString();
+        
+        console.log('STREAK_DEBUG:', { oldStreak: streak, newStreak, lastActive: profile.last_active, now });
+
+        // Update local state first for immediate UI feedback
+        setXp(prev => prev + finalXp);
+        const nextXp = xp + finalXp;
+        const nextLevel = calculateLevel(nextXp);
+        setLevel(nextLevel);
+        setStreak(newStreak);
+        setProfile((prev: any) => ({ ...prev, xp: nextXp, level: nextLevel, streak: newStreak, last_active: now }));
+
+        // Consolidate database update
+        await supabase.from('profiles').update({ 
+          xp: nextXp,
+          level: nextLevel,
+          streak: newStreak, 
+          last_active: now 
+        }).eq('id', session.user.id);
 
         sendNotification('MISSION ACCOMPLISHED', `Mandate "${task.title}" secured. +${finalXp} XP acquired.`);
         logActivity(session.user.id, 'task_completed', { 
@@ -624,7 +626,7 @@ export default function Dashboard() {
                   <div className="w-24 h-24 mb-6 flex items-center justify-center relative"><div className="absolute inset-0 bg-orange-500/20 blur-3xl animate-pulse" /><Flame size={64} className="text-orange-500 fill-orange-500" /></div>
                   <h3 className="text-4xl md:text-6xl font-black tracking-tighter mb-1">{streak}</h3>
                   <p className="text-orange-400 text-[8px] md:text-[10px] font-bold tracking-[0.3em] uppercase mb-4">DAY STREAK ACTIVE</p>
-                  <p className="text-slate-500 text-[9px] leading-relaxed italic max-w-[200px]">"Maintain operational consistency for 6 more cycles to unlock the Eternal Flame module."</p>
+                  <p className="text-slate-500 text-[9px] leading-relaxed italic max-w-[200px]">"Maintain operational consistency for {streak < 7 ? 7 - streak : streak < 15 ? 15 - streak : streak < 30 ? 30 - streak : 1} more cycles to unlock the next module."</p>
                 </div>
              </motion.section>
 
@@ -632,7 +634,7 @@ export default function Dashboard() {
                 <h3 className="text-[10px] font-bold text-[#00f2ff] tracking-[0.2em] uppercase border-b border-white/5 pb-4 mb-6 flex items-center"><Info size={14} className="mr-2" /> OPERATIONAL INTEL</h3>
                 <div className="space-y-6">
                    <div className="flex items-start space-x-4"><div className="w-2 h-2 mt-1.5 rounded-full bg-[#00f2ff] shadow-[0_0_10px_rgba(0,242,255,0.6)]" /><p className="text-xs text-slate-300 leading-relaxed font-medium">Efficiency: <span className="text-[#00f2ff] font-bold">{tasks.length > 0 ? Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100) : 0}%</span> across all sectors.</p></div>
-                   <div className="flex items-start space-x-4"><div className="w-2 h-2 mt-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(112,0,255,0.6)]" /><p className="text-xs text-slate-300 leading-relaxed font-medium">Identity Mode: <span className="text-purple-400 font-bold">{profile.mode || 'Builder'}</span>. XP Yield: <span className="text-purple-400 font-bold">x1.25</span>.</p></div>
+                   <div className="flex items-start space-x-4"><div className="w-2 h-2 mt-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(112,0,255,0.6)]" /><p className="text-xs text-slate-300 leading-relaxed font-medium">Identity Mode: <span className="text-purple-400 font-bold">{profile.mode || 'Builder'}</span>. XP Yield: <span className="text-purple-400 font-bold">x{calculateMultiplier(profile.mode || 'Builder', streak).toFixed(2)}</span>.</p></div>
                 </div>
              </section>
           </aside>
