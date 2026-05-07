@@ -148,3 +148,31 @@ export const calculateNewStreak = (lastActive: string | undefined, currentStreak
     return 1;
   }
 };
+
+export const determineBestMode = (tasks: any[], streak: number) => {
+  const completedTasks = tasks.filter(t => t.status === 'completed');
+  if (completedTasks.length === 0) return 'Builder';
+
+  const recentTasks = completedTasks.slice(0, 10);
+  
+  // War Mode: High Intensity (High streak + High volume)
+  if (streak >= 7 && recentTasks.length >= 5) return 'War';
+
+  // Money Mode: Strategic Focus
+  const strategyTasks = recentTasks.filter(t => 
+    t.module?.toLowerCase().includes('strategy') || 
+    t.title.toLowerCase().includes('money') || 
+    t.title.toLowerCase().includes('revenue')
+  );
+  if (strategyTasks.length >= 3) return 'Money';
+
+  // Monk Mode: Focus & Discipline
+  const focusTasks = recentTasks.filter(t => 
+    t.module?.toLowerCase().includes('focus') || 
+    t.title.toLowerCase().includes('meditate') || 
+    t.title.toLowerCase().includes('read')
+  );
+  if (focusTasks.length >= 3) return 'Monk';
+
+  return 'Builder';
+};

@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAndPenalties, calculateNewStreak, calculateMultiplier, getProgressXp, getXpToLevelUp } from '../lib/gameLogic';
+import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAndPenalties, calculateNewStreak, calculateMultiplier, getProgressXp, getXpToLevelUp, determineBestMode } from '../lib/gameLogic';
 import { checkNewAchievements } from '../lib/achievements';
 import type { Task, Status } from '../lib/types';
 import { initNotifications, sendNotification } from '../lib/notifications';
@@ -216,11 +216,11 @@ export default function Dashboard() {
       if (newStatus === 'completed' && oldStatus !== 'completed') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         
-        // Calculate new streak
-        const newStreak = calculateNewStreak(profile.last_active, streak);
-        const now = new Date().toISOString();
-        
-        console.log('STREAK_DEBUG:', { oldStreak: streak, newStreak, lastActive: profile.last_active, now });
+        // Dynamic Mode Update
+        const updatedTasks = tasks.map(t => t.id === task.id ? { ...t, status: 'completed' } : t);
+        const newMode = determineBestMode(updatedTasks, newStreak);
+
+        console.log('STREAK_DEBUG:', { oldStreak: streak, newStreak, lastActive: profile.last_active, now, newMode });
 
         // Update local state first for immediate UI feedback
         setXp(prev => prev + finalXp);
@@ -228,14 +228,15 @@ export default function Dashboard() {
         const nextLevel = calculateLevel(nextXp);
         setLevel(nextLevel);
         setStreak(newStreak);
-        setProfile((prev: any) => ({ ...prev, xp: nextXp, level: nextLevel, streak: newStreak, last_active: now }));
+        setProfile((prev: any) => ({ ...prev, xp: nextXp, level: nextLevel, streak: newStreak, last_active: now, mode: newMode }));
 
         // Consolidate database update
         await supabase.from('profiles').update({ 
           xp: nextXp,
           level: nextLevel,
           streak: newStreak, 
-          last_active: now 
+          last_active: now,
+          mode: newMode
         }).eq('id', session.user.id);
 
         sendNotification('MISSION ACCOMPLISHED', `Mandate "${task.title}" secured. +${finalXp} XP acquired.`);
@@ -574,25 +575,20 @@ export default function Dashboard() {
                 
                 <div className="glass-panel p-8 rounded-2xl space-y-8">
                   <div className="space-y-4">
-                    <h3 className="text-xs font-bold text-[#00f2ff] uppercase tracking-[0.2em]">IDENTITY MODE SELECTION</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">Switching identity modes adjusts your neural focus and XP multipliers. Higher intensity modes offer greater rewards but require stricter execution.</p>
+                    <h3 className="text-xs font-bold text-[#00f2ff] uppercase tracking-[0.2em]">IDENTITY MODE ALLOCATION (AUTOMATED)</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">Identity modes are now intelligently assigned based on your recent performance, focus sectors, and operational intensity. Manual override is disabled to maintain system integrity.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                       {[
                         { id: 'Builder', icon: Cloud, mult: '1.0x', desc: 'Balanced operational growth.' },
-                        { id: 'Money', icon: Bolt, mult: '1.5x', desc: 'Focus on revenue mandates.' },
-                        { id: 'Monk', icon: Info, mult: '1.2x', desc: 'Deep work & discipline.' },
-                        { id: 'War', icon: Flame, mult: '2.0x', desc: 'Maximum intensity execution.' }
+                        { id: 'Money', icon: Bolt, mult: '1.5x', desc: 'Active when focusing on revenue mandates.' },
+                        { id: 'Monk', icon: Info, mult: '1.2x', desc: 'Active during deep work & discipline phases.' },
+                        { id: 'War', icon: Flame, mult: '2.0x', desc: 'High intensity execution (7+ Day Streak).' }
                       ].map(mode => (
                         <div 
                           key={mode.id}
-                          onClick={async () => {
-                            await supabase.from('profiles').update({ mode: mode.id }).eq('id', session.user.id);
-                            logActivity(session.user.id, 'mode_change', { from: profile.mode, to: mode.id });
-                            initialize();
-                          }}
-
-                          className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${profile.mode === mode.id ? 'border-[#00f2ff] bg-[#00f2ff]/5' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
+                          className={`p-6 rounded-xl border-2 transition-all relative ${profile.mode === mode.id ? 'border-[#00f2ff] bg-[#00f2ff]/5' : 'border-white/5 bg-white/5 opacity-50 grayscale'}`}
                         >
+                          {profile.mode === mode.id && <div className="absolute top-2 right-2 px-2 py-0.5 bg-[#00f2ff] text-black text-[7px] font-black uppercase rounded">Active Mode</div>}
                           <mode.icon className={`w-8 h-8 mb-4 ${profile.mode === mode.id ? 'text-[#00f2ff]' : 'text-slate-500'}`} />
                           <h4 className="font-bold uppercase tracking-tight mb-1">{mode.id}</h4>
                           <p className="text-[10px] font-mono font-bold text-[#00f2ff] mb-2">{mode.mult} XP Yield</p>
