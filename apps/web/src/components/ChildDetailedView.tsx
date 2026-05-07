@@ -23,6 +23,7 @@ import AIInsights from './AIInsights';
 import Reports from './Reports';
 import TaskModal from './TaskModal';
 import { supabase } from '../lib/supabase';
+import { getProgressXp, getXpToLevelUp } from '../lib/gameLogic';
 
 interface ChildDetailedViewProps {
   child: UserProfile;
@@ -34,11 +35,28 @@ interface ChildDetailedViewProps {
 
 export default function ChildDetailedView({ child, tasks, onClose, onRefresh, parentProfile }: ChildDetailedViewProps) {
   const [isTaskModalOpen, setIsTaskModalOpen] = React.useState(false);
-  const level = calculateLevel(child.xp || 0);
+  const [currentChild, setCurrentChild] = React.useState(child);
+
+  React.useEffect(() => {
+    fetchLatestChildData();
+  }, [child.id]);
+
+  const fetchLatestChildData = async () => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', child.id)
+      .single();
+    
+    if (data) setCurrentChild(data);
+  };
+
+  const level = calculateLevel(currentChild.xp || 0);
   const phase = getPhase(level);
   const identity = getIdentity(level);
-  const xpInLevel = (child.xp || 0) % 1000;
-  const progress = (xpInLevel / 1000) * 100;
+  const xpInLevel = getProgressXp(currentChild.xp || 0);
+  const xpRequired = getXpToLevelUp(level);
+  const progress = (xpInLevel / xpRequired) * 100;
 
   const handleAssignTask = async (taskData: any) => {
     const { error } = await supabase.from('tasks').insert([{
@@ -141,8 +159,8 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
                 />
               </div>
               <div className="flex justify-between text-[11px] font-mono font-bold text-slate-500 uppercase tracking-widest px-1">
-                <span>{xpInLevel} / 1000 XP EARNED</span>
-                <span className="text-[#00f2ff]">{1000 - xpInLevel} XP TO ASCENSION</span>
+                <span>{xpInLevel} / {xpRequired} XP EARNED</span>
+                <span className="text-[#00f2ff]">{xpRequired - xpInLevel} XP TO ASCENSION</span>
               </div>
             </motion.section>
 
@@ -164,7 +182,7 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
                 <div className="absolute inset-0 bg-orange-500/20 blur-3xl" />
                 <TrendingUp size={64} className="text-orange-500 relative z-10" />
               </div>
-              <h3 className="text-7xl font-black tracking-tighter text-white mb-1">{child.streak || 0}</h3>
+              <h3 className="text-7xl font-black tracking-tighter text-white mb-1">{currentChild.streak || 0}</h3>
               <p className="text-orange-500 text-[11px] font-bold tracking-[0.4em] uppercase mb-6">DAY STREAK ACTIVE</p>
               <div className="w-full h-px bg-white/5 mb-6" />
               <p className="text-slate-500 text-[10px] leading-relaxed italic px-4">
@@ -272,7 +290,8 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
                             </a>
                           </div>
                         )}
-                        {task.proof_video_url && (
+                      </div>
+                      {task.proof_video_url && (
                           <a 
                             href={task.proof_video_url} 
                             target="_blank" 
@@ -284,6 +303,11 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
                           </a>
                         )}
                       </div>
+                      {task.proof_notes && (
+                        <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                          <p className="text-[10px] text-slate-400 leading-relaxed italic">"{task.proof_notes}"</p>
+                        </div>
+                      )}
                     </div>
                   ) : task.status === 'completed' ? (
                     <div className="p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/20">

@@ -19,6 +19,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { calculateLevel } from '../lib/gameLogic';
 import type { Task, UserProfile } from '../lib/types';
 import ChildDetailedView from './ChildDetailedView';
 import TaskModal from './TaskModal';
@@ -181,9 +182,9 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
                   <div className="flex-1">
                     <h4 className="font-black uppercase tracking-tight text-white">{child.full_name || 'Unit ' + child.id.slice(0, 4)}</h4>
                     <div className="flex items-center space-x-3 mt-1">
-                      <span className="text-[9px] font-mono font-bold text-[#00f2ff] uppercase tracking-widest">LVL {child.level || 1}</span>
+                      <span className="text-[9px] font-mono font-bold text-[#00f2ff] uppercase tracking-widest">LVL {calculateLevel(child.xp || 0)}</span>
                       <div className="w-1 h-1 rounded-full bg-slate-700" />
-                      <span className="text-[9px] font-mono font-bold text-orange-500 uppercase tracking-widest">{child.streak || 0} MODE: {child.mode}</span>
+                      <span className="text-[9px] font-mono font-bold text-orange-500 uppercase tracking-widest">{child.streak || 0} DAY STREAK • MODE: {child.mode}</span>
                     </div>
                   </div>
                   <TrendingUp size={16} className="text-slate-600" />
