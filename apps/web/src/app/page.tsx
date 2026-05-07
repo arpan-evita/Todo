@@ -284,8 +284,6 @@ export default function Dashboard() {
         mode: taskData.mode,
         type: taskData.type,
         priority: taskData.priority,
-        image_url: taskData.image_url,
-        link: taskData.link,
         assigned_role: taskData.assigned_role,
       }).eq('id', editingTask.id);
       if (error) {
@@ -304,8 +302,6 @@ export default function Dashboard() {
         mode: taskData.mode,
         type: taskData.type,
         priority: taskData.priority,
-        image_url: taskData.image_url,
-        link: taskData.link,
         assigned_role: taskData.assigned_role,
       }]).select().single();
       
