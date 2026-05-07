@@ -19,6 +19,7 @@ export interface Task {
   xp: number;
   proof_screenshot_url?: string;
   proof_video_url?: string;
+  proof_notes?: string;
   assigned_by?: string;
   mode?: string;
   assigned_role?: string;
