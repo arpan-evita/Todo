@@ -216,6 +216,10 @@ export default function Dashboard() {
       if (newStatus === 'completed' && oldStatus !== 'completed') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         
+        // Calculate new streak
+        const newStreak = calculateNewStreak(profile.last_active, streak);
+        const now = new Date().toISOString();
+        
         // Dynamic Mode Update
         const updatedTasks = tasks.map(t => t.id === task.id ? { ...t, status: 'completed' } : t);
         const newMode = determineBestMode(updatedTasks, newStreak);
