@@ -151,6 +151,34 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask, module
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm outline-none focus:border-[#00f2ff]/50 resize-none" />
               </div>
 
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 tracking-widest uppercase">MISSION BRIEFING IMAGE</label>
+                <div className="flex items-center space-x-4">
+                  <div 
+                    onClick={() => document.getElementById('task-image-upload')?.click()}
+                    className={`flex-1 h-20 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden ${imageUrl ? 'border-[#00f2ff]/50 bg-[#00f2ff]/5' : 'border-white/10 bg-white/5 hover:border-[#00f2ff]/30'}`}
+                  >
+                    {uploading ? (
+                      <span className="text-[8px] font-bold text-[#00f2ff] animate-pulse">UPLOADING...</span>
+                    ) : imageUrl ? (
+                      <div className="flex items-center space-x-3 px-4">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10"><img src={imageUrl} className="w-full h-full object-cover" alt="Preview" /></div>
+                        <span className="text-[8px] font-bold text-green-500 uppercase">IMAGE SECURED</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <Upload size={16} className="text-slate-600 mb-1" />
+                        <span className="text-[8px] font-bold text-slate-500 uppercase">Click to upload briefing image</span>
+                      </div>
+                    )}
+                    <input id="task-image-upload" type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
+                  </div>
+                  {imageUrl && (
+                    <button type="button" onClick={() => setImageUrl('')} className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all"><X size={16} /></button>
+                  )}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-3">
                   <label className="text-[10px] font-bold text-[#00f2ff] tracking-[0.2em] uppercase">SECTOR (MODULE)</label>

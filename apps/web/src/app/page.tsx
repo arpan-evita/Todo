@@ -518,7 +518,14 @@ export default function Dashboard() {
                                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-none mt-1">{task.module} • {task.type || 'DAILY'}</p>
                                    <div className="flex items-center space-x-3 mt-2">
                                       {task.description && <div className="w-1 h-1 rounded-full bg-slate-700" />}
-                                      {task.image_url && <div className="w-1 h-1 rounded-full bg-purple-500" />}
+                                      {task.image_url && (
+                                        <div className="relative group/img">
+                                          <ImageIcon size={14} className="text-[#00f2ff] opacity-50 group-hover/img:opacity-100 transition-opacity" />
+                                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-32 h-32 rounded-lg overflow-hidden border border-[#00f2ff]/30 shadow-2xl opacity-0 group-hover/img:opacity-100 transition-opacity pointer-events-none z-50">
+                                            <img src={task.image_url} className="w-full h-full object-cover" alt="Briefing" />
+                                          </div>
+                                        </div>
+                                      )}
                                       {task.assigned_by && <div className="px-2 py-0.5 rounded bg-[#00f2ff]/10 text-[#00f2ff] text-[8px] font-black uppercase">Guardian Protocol</div>}
                                    </div>
                                  </div>
