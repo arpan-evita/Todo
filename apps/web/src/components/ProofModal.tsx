@@ -8,13 +8,14 @@ import { supabase } from '../lib/supabase';
 interface ProofModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (proofData: { screenshotUrl: string; videoUrl: string }) => void;
+  onConfirm: (proofData: { screenshotUrl: string; videoUrl: string; notes?: string }) => void;
   taskTitle: string;
 }
 
 export default function ProofModal({ isOpen, onClose, onConfirm, taskTitle }: ProofModalProps) {
   const [screenshotUrl, setScreenshotUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [notes, setNotes] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -47,9 +48,10 @@ export default function ProofModal({ isOpen, onClose, onConfirm, taskTitle }: Pr
       alert('CRITICAL: Screenshot evidence missing.');
       return;
     }
-    onConfirm({ screenshotUrl, videoUrl });
+    onConfirm({ screenshotUrl, videoUrl, notes });
     setScreenshotUrl('');
     setVideoUrl('');
+    setNotes('');
   };
 
   return (
@@ -149,6 +151,21 @@ export default function ProofModal({ isOpen, onClose, onConfirm, taskTitle }: Pr
                     />
                     <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-500 transition-colors" size={16} />
                   </div>
+                </div>
+
+                {/* Optional Notes */}
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2 text-[10px] font-bold text-slate-500 tracking-widest uppercase">
+                    <CheckCircle2 size={14} className="text-emerald-500" />
+                    <span>MISSION NOTES (OPTIONAL)</span>
+                  </label>
+                  <textarea 
+                    value={notes} 
+                    onChange={(e) => setNotes(e.target.value)} 
+                    placeholder="Provide additional mission intel or context..." 
+                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-xs focus:border-emerald-500/50 outline-none transition-all placeholder:text-slate-700 resize-none" 
+                    rows={3}
+                  />
                 </div>
               </div>
 

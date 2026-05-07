@@ -206,6 +206,7 @@ export default function Dashboard() {
     if (proofData) {
       updatePayload.proof_screenshot_url = proofData.screenshotUrl;
       updatePayload.proof_video_url = proofData.videoUrl;
+      updatePayload.proof_notes = proofData.notes;
     }
 
     const { error } = await supabase.from('tasks').update(updatePayload).eq('id', task.id);
