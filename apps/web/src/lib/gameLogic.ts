@@ -90,3 +90,30 @@ export const checkStreakAndPenalties = (lastActive: string, currentXp: number, c
 
   return { newStreak, penaltyXp, status };
 };
+
+export const calculateNewStreak = (lastActive: string | undefined, currentStreak: number) => {
+  if (!lastActive) return 1;
+
+  const last = new Date(lastActive);
+  const now = new Date();
+  
+  // Reset time to start of day for accurate day diff
+  const lastDay = new Date(last.getFullYear(), last.getMonth(), last.getDate());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  const diffDays = Math.floor((today.getTime() - lastDay.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    // Already active today. 
+    // If streak is 0, it means it was recently reset (e.g. by initialize). 
+    // Completing a task should make it 1.
+    if (currentStreak === 0) return 1;
+    return currentStreak;
+  } else if (diffDays === 1) {
+    // Active yesterday, increment streak
+    return currentStreak + 1;
+  } else {
+    // Missed days, start new streak
+    return 1;
+  }
+};

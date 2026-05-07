@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAndPenalties } from '../lib/gameLogic';
+import { calculateLevel, getIdentity, getPhase, calculateFinalXp, checkStreakAndPenalties, calculateNewStreak } from '../lib/gameLogic';
 import { checkNewAchievements } from '../lib/achievements';
 import type { Task, Status } from '../lib/types';
 import { initNotifications, sendNotification } from '../lib/notifications';
@@ -214,6 +214,26 @@ export default function Dashboard() {
       if (newStatus === 'completed' && oldStatus !== 'completed') {
         const finalXp = calculateFinalXp(task.xp || 150, profile.mode || 'Builder', streak);
         grantXp(finalXp);
+        
+        // Update Streak
+        const newStreak = calculateNewStreak(profile.last_active, streak);
+        if (newStreak !== streak || !profile.last_active) {
+          setStreak(newStreak);
+          const now = new Date().toISOString();
+          setProfile((prev: any) => ({ ...prev, streak: newStreak, last_active: now }));
+          await supabase.from('profiles').update({ 
+            streak: newStreak, 
+            last_active: now 
+          }).eq('id', session.user.id);
+        } else {
+          // Still update last_active to track today's activity
+          const now = new Date().toISOString();
+          setProfile((prev: any) => ({ ...prev, last_active: now }));
+          await supabase.from('profiles').update({ 
+            last_active: now 
+          }).eq('id', session.user.id);
+        }
+
         sendNotification('MISSION ACCOMPLISHED', `Mandate "${task.title}" secured. +${finalXp} XP acquired.`);
         logActivity(session.user.id, 'task_completed', { 
           task_id: task.id, 

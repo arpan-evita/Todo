@@ -37,4 +37,5 @@ export interface UserProfile {
   parent_id?: string;
   custom_modules: string[];
   social_links: any;
+  last_active?: string;
 }
