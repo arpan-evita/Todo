@@ -19,7 +19,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { calculateLevel } from '../lib/gameLogic';
+import { calculateLevel, calculateFinalXp, calculateNewStreak, determineBestMode } from '../lib/gameLogic';
 import type { Task, UserProfile } from '../lib/types';
 import ChildDetailedView from './ChildDetailedView';
 import TaskModal from './TaskModal';
@@ -118,9 +118,42 @@ export default function ParentDashboard({ parentProfile }: ParentDashboardProps)
   };
 
   const updateChildTaskStatus = async (task: Task, newStatus: any) => {
+    if (!selectedChild) return;
+
     const { error } = await supabase.from('tasks').update({ status: newStatus }).eq('id', task.id);
-    if (!error) {
-      if (selectedChild) fetchChildTasks(selectedChild.id);
+    
+    if (!error && newStatus === 'completed') {
+      const finalXp = calculateFinalXp(task.xp || 150, selectedChild.mode || 'Builder', selectedChild.streak || 0);
+      const newStreak = calculateNewStreak(selectedChild.last_active, selectedChild.streak || 0);
+      const now = new Date().toISOString();
+      
+      const updatedTasks = childTasks.map(t => t.id === task.id ? { ...t, status: 'completed' } : t);
+      const newMode = determineBestMode(updatedTasks, newStreak);
+
+      const nextXp = (selectedChild.xp || 0) + finalXp;
+      const nextLevel = calculateLevel(nextXp);
+
+      await supabase.from('profiles').update({ 
+        xp: nextXp,
+        level: nextLevel,
+        streak: newStreak, 
+        last_active: now,
+        mode: newMode
+      }).eq('id', selectedChild.id);
+
+      // Refresh data
+      fetchChildren();
+      fetchChildTasks(selectedChild.id);
+      setSelectedChild({
+        ...selectedChild,
+        xp: nextXp,
+        level: nextLevel,
+        streak: newStreak,
+        last_active: now,
+        mode: newMode
+      });
+    } else if (!error) {
+      fetchChildTasks(selectedChild.id);
     }
   };
 
