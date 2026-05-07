@@ -17,13 +17,12 @@ import {
   Clock,
   ExternalLink
 } from 'lucide-react';
-import { calculateLevel, getIdentity, getPhase } from '../lib/gameLogic';
+import { calculateLevel, getIdentity, getPhase, getProgressXp, getXpToLevelUp } from '../lib/gameLogic';
 import type { Task, UserProfile } from '../lib/types';
 import AIInsights from './AIInsights';
 import Reports from './Reports';
 import TaskModal from './TaskModal';
 import { supabase } from '../lib/supabase';
-import { getProgressXp, getXpToLevelUp } from '../lib/gameLogic';
 
 interface ChildDetailedViewProps {
   child: UserProfile;
@@ -93,10 +92,10 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
           </button>
           <div>
             <h2 className="text-2xl font-black italic tracking-tighter uppercase leading-none text-white">
-              DEEP SURVEILLANCE: <span className="text-[#00f2ff]">{child.full_name}</span>
+              DEEP SURVEILLANCE: <span className="text-[#00f2ff]">{currentChild.full_name}</span>
             </h2>
             <p className="text-[10px] font-mono font-bold text-slate-500 mt-1 uppercase tracking-widest">
-              UNIT ID: {child.id.slice(0, 8)} • MODE: {child.mode}
+              UNIT ID: {currentChild.id.slice(0, 8)} • MODE: {currentChild.mode}
             </p>
           </div>
         </div>
@@ -113,7 +112,7 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
             <p className="text-[10px] font-black text-emerald-500 uppercase">Neural Link Stable</p>
           </div>
           <div className="w-12 h-12 rounded-full border-2 border-[#00f2ff] p-0.5">
-            <img src={child.avatar_url} className="w-full h-full rounded-full object-cover" alt="Unit" />
+            <img src={currentChild.avatar_url} className="w-full h-full rounded-full object-cover" alt="Unit" />
           </div>
         </div>
       </header>
@@ -125,7 +124,7 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
             <Cpu size={18} className="text-[#00f2ff]" />
             <h3 className="text-[10px] font-black tracking-[0.3em] text-[#00f2ff] uppercase">NEURAL ANALYTICS</h3>
           </div>
-          <AIInsights userId={child.id} />
+          <AIInsights userId={currentChild.id} />
         </section>
 
         <div className="grid grid-cols-12 gap-8">
@@ -207,17 +206,6 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
                   </p>
                </div>
             </div>
-
-            {/* Security Alert */}
-            <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-3xl flex items-start space-x-4">
-               <ShieldAlert className="text-red-500 shrink-0" size={24} />
-               <div>
-                  <h4 className="text-[11px] font-black text-red-500 uppercase tracking-widest mb-1">Surveillance Note</h4>
-                  <p className="text-[10px] text-slate-400 leading-relaxed">
-                    You are in high-level surveillance mode. All neural interactions are being logged at the command level.
-                  </p>
-               </div>
-            </div>
           </aside>
         </div>
 
@@ -227,16 +215,6 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
             <div className="flex items-center space-x-3">
               <Target size={18} className="text-[#00f2ff]" />
               <h3 className="text-[10px] font-black tracking-[0.3em] text-[#00f2ff] uppercase">MISSION LOG ARCHIVE</h3>
-            </div>
-            <div className="flex space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 rounded-full bg-[#00f2ff]" />
-                <span className="text-[9px] font-bold text-slate-500 uppercase">Mandated</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-[9px] font-bold text-slate-500 uppercase">Secured</span>
-              </div>
             </div>
           </div>
 
@@ -250,15 +228,12 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
                 <motion.div 
                   key={task.id}
                   whileHover={{ y: -5 }}
-                  className={`glass-panel p-6 rounded-3xl border-2 transition-all ${task.status === 'completed' ? 'border-green-500/20 bg-green-500/5' : 'border-white/5'} ${task.assigned_by ? 'ring-1 ring-[#00f2ff]/20' : ''}`}
+                  className={`glass-panel p-6 rounded-3xl border-2 transition-all ${task.status === 'completed' ? 'border-green-500/20 bg-green-500/5' : 'border-white/5'}`}
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className={`p-2 rounded-lg ${task.status === 'completed' ? 'bg-green-500/10 text-green-500' : 'bg-slate-500/10 text-slate-500'}`}>
                       {task.status === 'completed' ? <CheckCircle2 size={18} /> : <Clock size={18} />}
                     </div>
-                    {task.assigned_by && (
-                      <span className="px-2 py-0.5 bg-[#00f2ff]/10 text-[#00f2ff] text-[8px] font-black uppercase rounded-md border border-[#00f2ff]/20">MANDATED</span>
-                    )}
                   </div>
 
                   <h4 className={`text-sm font-bold text-white mb-2 ${task.status === 'completed' ? 'opacity-60' : ''}`}>{task.title}</h4>
@@ -269,7 +244,7 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
                     <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">TYPE: {task.type}</span>
                   </div>
 
-                  {task.status === 'completed' && (task.proof_screenshot_url || task.proof_video_url) ? (
+                  {task.status === 'completed' && (task.proof_screenshot_url || task.proof_video_url || task.proof_notes) ? (
                     <div className="space-y-4">
                       <p className="text-[9px] font-black text-[#00f2ff] uppercase tracking-widest mb-2 flex items-center space-x-2">
                         <Eye size={12} />
@@ -290,8 +265,7 @@ export default function ChildDetailedView({ child, tasks, onClose, onRefresh, pa
                             </a>
                           </div>
                         )}
-                      </div>
-                      {task.proof_video_url && (
+                        {task.proof_video_url && (
                           <a 
                             href={task.proof_video_url} 
                             target="_blank" 
