@@ -196,7 +196,7 @@ export default function Dashboard() {
     }
   };
 
-  const updateTaskStatus = async (task: Task, newStatus: Status, proofData?: { screenshotUrl: string; videoUrl: string }) => {
+  const updateTaskStatus = async (task: Task, newStatus: Status, proofData?: { screenshotUrl: string; videoUrl: string; notes?: string }) => {
     const oldStatus = task.status;
     const updatePayload: any = { 
       status: newStatus, 
